@@ -1,4 +1,5 @@
 #include "ALU.h"
+
 #define M_PI       3.14159265358979323846   // pi
 
 using std::vector;
@@ -10,7 +11,7 @@ using std::stack;
 
 map<string, int> ALU::priority = {
 	//括号和数字函数
-	{"(",-1},{")",-1},{"ABS(",-1},{"SIN(",-1},{"EXP(",-1},{"COS(",-1},{"PI(",-1},
+	{"(",-1},{")",-1},{"ABS(",-1},{"SIN(",-1},{"COS(",-1},{"EXP(",-1} ,{"PI(",-1},
 	//逻辑运算符
 	{"||",1},{"OR",1},{"XOR",1},{"&&",2},{"AND",2},{"NOT",3},{"!",3},
 	//算术运算符
@@ -21,16 +22,17 @@ set<string> ALU::function = {
 	"ABS(","SIN(","EXP(","COS(","PI(","("
 };
 
-string ALU::process()
+void ALU::process()
 {
-	std::transform(expression.begin(), expression.end(), expression.begin(), ::toupper);
-
-	ALUformat();
+	//string tmp_expression = toUpper(expression);
+	expression = toUpper(expression);
+	ALUformat(expression);
 	vector<string> ex_split = split(expression, " ");
 	ex_split = Transfer(ex_split);
 
 	string result = Calculate(ex_split);
-	return result;
+	output(result);
+	
 }
 
 vector<string> ALU::Transfer(const vector<string>& str)
@@ -180,28 +182,33 @@ string ALU::Calculate(const vector<string>& expression)
 	return tmp;
 }
 
-void ALU::ALUformat()
+void ALU::output(const string& result)
+{
+	std::cout << expression << std::endl << result << std::endl;
+}
+
+void ALU::ALUformat(string& str)
 {
 	regex reg(" ?(\\+|-|\\*|/|%|(DIV)|(MOD)|\\(|\\)) ?");
-	expression = regex_replace(expression, reg, " $1 ");
+	str = regex_replace(str, reg, " $1 ");
 	reg = " ?((OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!) ?";
-	expression = regex_replace(expression, reg, " $1 ");
+	str = regex_replace(str, reg, " $1 ");
 	reg = " ?((ABS)|(SIN)|(COS)|(EXP)|(PI)) ?";
-	expression = regex_replace(expression, reg, " $1 ");
+	str = regex_replace(str, reg, " $1 ");
 	reg = "(^ +)|( +$)";
-	expression = regex_replace(expression, reg, "");
+	str = regex_replace(str, reg, "");
 	reg = " +";
-	expression = regex_replace(expression, reg, " ");
+	str = regex_replace(str, reg, " ");
 	reg = "ABS *\\(";
-	expression = regex_replace(expression, reg, "ABS(");
+	str = regex_replace(str, reg, "ABS(");
 	reg = "SIN *\\(";
-	expression = regex_replace(expression, reg, "SIN(");
+	str = regex_replace(str, reg, "SIN(");
 	reg = "COS *\\(";
-	expression = regex_replace(expression, reg, "COS(");
+	str = regex_replace(str, reg, "COS(");
 	reg = "EXP *\\(";
-	expression = regex_replace(expression, reg, "EXP(");
+	str = regex_replace(str, reg, "EXP(");
 	reg = "PI *\\(";
-	expression = regex_replace(expression, reg, "PI(");
+	str = regex_replace(str, reg, "PI(");
 }
 
 bool IsDouble(const string& result) {

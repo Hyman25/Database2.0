@@ -2,12 +2,14 @@
 #include <string>
 #include <sstream>
 #include <regex>
+#include "ALU.h"
 #include "DatabaseMap.h"
-void Link();
+
 extern DatabaseMap DB;
 
 using std::string;
 
+class ALU;
 class Command {
 public:
 	Command(std::string c) :buffer(c) {}
@@ -26,10 +28,11 @@ private:
 	void Delete();
 	void Select();
 	void Load();
-
-	friend std::vector<string> split(const string& str, const string& sep);
-	friend inline string toUpper(const string& str);
-	friend inline string getFirstSubstr(string& str, const string& sep);
 };
 
+void LinkAsServer();
+void LinkAsClient();
+inline string toUpper(const string& str);
+inline string getFirstSubstr(string& str, const string& sep);
+std::vector<string> split(const string& str, const string& sep);
 std::set<Data> where_clause(std::string table_name, std::string clause);

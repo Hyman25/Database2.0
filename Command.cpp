@@ -63,7 +63,9 @@ void Command::operate() {
 	else if (order == "LOAD")
 		Load();
 	else if (order == "INTERNET")
-		Link();
+		LinkAsServer();
+	else if (order == "LINK")
+		LinkAsClient();
 }
 
 void Command::FormatSQL()
@@ -246,60 +248,80 @@ void Command::Delete() {
 }
 
 void Command::Select() {
-	string attr_name = getFirstSubstr(buffer, " ");
+	string CountAttr = "", FileName = "", orderby = "", orderbyCount = "", whereclause = "";
+	vector<string> Columns, groupbyAttr;
+	int countpos = -1;
+
+	string tmp = toUpper(buffer);
+	string::size_type pos = tmp.find("FROM");//将select语句按照from关键词分开
+	string str = buffer.substr(0, pos);
+	buffer.erase(0, pos);
+
+	if (buffer.empty()) {
+		ALU expression(str);
+		expression.process();
+		return;
+	}
 
 	string FROM = toUpper(getFirstSubstr(buffer, " "));
 	if (FROM != "FROM") return;  //输入异常
-
 	string table_name = getFirstSubstr(buffer, " ");
-	std::set<Data> key_of_rows;
+	Table& table = DB.getDatabase().getTable(table_name);
 
-	if (attr_name == "*") {
-		if (buffer.empty()) {
-			key_of_rows = DB.GetAllKeys(table_name);
-		}
-		else {
-			string WHERE = toUpper(getFirstSubstr(buffer, " "));
-			if (WHERE != "WHERE") return;
 
-			key_of_rows = where_clause(table_name, buffer);
-		}
+	regex reg("INTO OUTFILE", regex::icase);//不区分大小写
+	bool toFile = false;//判断是否输出到文件
+	if (regex_match(str, reg)) {
+		regex_replace(str, reg, "");
+		toFile = true;
+	}
+	string tmpColumns = getFirstSubstr(str," ");
 
-		if (!key_of_rows.empty()) {
-			DB.OutputAttr(table_name);
-			for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++)
-				DB.OutputRow(table_name, (*i).value);
+	if (tmpColumns == "*") {
+		for (int i = 0; i < table.attr_list.size(); ++i) {
+			Columns.push_back(table.attr_list[i].name);
+			countpos = i;
 		}
 	}
 
 	else {
-		vector<string> attr_names = split(attr_name, ",");
-		for (auto i = attr_names.begin(); i < attr_names.end() - 1; i++)
-			std::cout << (*i) << "\t";
-		std::cout << *(attr_names.end() - 1) << "\n";
+		Columns = split(tmpColumns, ",");
+		for (auto i : Columns) {
+			string COUNT = getFirstSubstr(i, "(");
+			if (toUpper(COUNT) != "COUNT") continue;
 
-		if (buffer.empty()) {
-			key_of_rows = DB.GetAllKeys(table_name);
-		}
-		else {
-			string WHERE = toUpper(getFirstSubstr(buffer, " "));
-			if (WHERE != "WHERE") return;
-
-			key_of_rows = where_clause(table_name, buffer);
-		}
-		int k = attr_names.size();
-		for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
-			for (int j = 0; j < k; j++) {
-				string value = DB.GetValue(table_name, attr_names[j], (*i).value);
-				string type = DB.GetType(table_name, attr_names[j]);
-				OutputData(value, type);
-				if (j != k - 1)
-					std::cout << "\t";
-			}
-			std::cout << "\n";
+			CountAttr = getFirstSubstr(i, ")");
 		}
 	}
+	if (toFile) FileName = str;
+
+	tmp = toUpper(buffer);
+	pos = tmp.find("GROUP");//提取where子句
+	whereclause = buffer.substr(0, pos);
+	buffer.erase(0, pos);
+	if (!whereclause.empty()) {
+		string WHERE = toUpper(getFirstSubstr(whereclause, " "));
+		if (WHERE != "WHERE") return;
+	}
+
+	vector<string> tmp_orders = split(buffer, " ");
+	if (tmp_orders.size() >= 3 &&
+		toUpper(tmp_orders[0]) == "GROUP" &&
+		toUpper(tmp_orders[1]) == "BY")
+		groupbyAttr = split(tmp_orders[2], ",");
+	if (tmp_orders.size() == 6 &&
+		toUpper(tmp_orders[3]) == "ORDER" &&
+		toUpper(tmp_orders[4]) == "BY") {
+		orderby = tmp_orders[5];
+
+		string COUNT = getFirstSubstr(orderby, "(");
+		if (toUpper(COUNT) == "COUNT")
+			orderbyCount = getFirstSubstr(orderby, ")");
+	}
+
+	table.SelectData(Columns, CountAttr, countpos, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
 }
+
 
 void Command::Load()
 {
@@ -327,13 +349,17 @@ void Command::Load()
 	
 	string tableAttr = orders[orders.size() - 1], 
 		tableName=getFirstSubstr(tableAttr,"(");
+	Table& table = DB.getDatabase().getTable(tableName);
+
 	vector<string> Columns;
 	if (!tableAttr.empty()) {
 		Columns = split(getFirstSubstr(tableAttr, ")"), ",");
 	}
 	else {
-
+		for (auto i : table.attr_list)
+			Columns.push_back(i.name);
 	}
+	table.LoadFile(fileName, Columns);
 }
 
 std::set<Data> where_clause(std::string table_name, std::string clause) {
