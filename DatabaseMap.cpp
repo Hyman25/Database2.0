@@ -99,3 +99,14 @@ std::set<Data> DatabaseMap::KeyWhereCluase(const std::string table_name, const C
 std::string DatabaseMap::getkeytype(const std::string table_name) {
 	return current_db->getkeytype(table_name);
 }
+
+void DatabaseMap::SelectData(const std::vector<std::string> attrName, 
+	const std::vector<std::string> countAttr, 
+	const std::vector<std::string> groupby, 
+	const std::string orderbyAttr, 
+	const std::string orderbyCount, 
+	const std::string Where,
+	const std::string outfile)
+{
+
+}

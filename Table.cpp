@@ -187,3 +187,8 @@ std::set<Data> Table::keywherecluase(const Clause c)
 	}
 	return keys;
 }
+
+std::map<Data, int> Table::Count(std::string)
+{
+	return std::map<Data, int>();
+}
