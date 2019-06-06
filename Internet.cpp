@@ -1,7 +1,9 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <Winsock2.h>
 #include <iostream>
-#include "Command.h"
 #include <string>
+#include "Command.h"
 using namespace std;
 #pragma comment(lib,"ws2_32.lib")
 
@@ -10,8 +12,6 @@ SOCKET sockServer;
 SOCKADDR_IN addrServer;
 SOCKET sockClient;
 SOCKADDR_IN addrClient;
-
-
 
 void Link()
 {
@@ -77,3 +77,42 @@ void Link()
 	WSACleanup();
 }
 
+void LinkClient(){
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	//新建客户端socket
+	sockClient = socket(AF_INET, SOCK_STREAM, 0);
+	//定义要连接的服务端地址
+	std::string s;
+	int port;
+	std::cout << "输入要连接的Ip地址与端口号" << std::endl;
+	std::cin >> s >> port; getchar();
+	addrServer.sin_addr.S_un.S_addr = inet_addr(s.c_str());//目标IP(127.0.0.1是回送地址)
+	addrServer.sin_family = AF_INET;
+	addrServer.sin_port = htons(port);//连接端口6000
+	//连接到服务端
+	int error=connect(sockClient, (SOCKADDR*)& addrServer, sizeof(SOCKADDR));
+
+	if (!error) cout << "Connected!\n";
+	else if (error == SOCKET_ERROR) {
+		cout << "ERROR!\n";
+		return;
+	}
+	//发送数据
+	char message[2000]; //= "HelloSocket!";
+	while (true)
+	{
+		std::cin.getline(message, ';');
+		send(sockClient, message, strlen(message) + 1, 0);
+		char buf[100];
+		if (memcmp(message, "exit", 4) == 0)
+		{
+			break;
+		}
+		recv(sockClient, buf, 100, MSG_PEEK);
+		std::cout << buf << std::endl;
+	}
+	//关闭socket
+	closesocket(sockClient);
+	std::cout << "断开连接。" << std::endl;
+	WSACleanup();
+}
