@@ -33,5 +33,7 @@ public:
 	void find(const std::string key);
 	std::set<Data> getallkeys();
 	std::set<Data> keywherecluase(const Clause c);
+
+	std::map<Data, int> Count(std::string);
 };
 
