@@ -2,7 +2,7 @@
 
 推荐使用Typora编辑查看markdown文件。
 
-### 6.6 21:42 update by zhanghexiao
+### 6.6 21:42 updated by zhanghexiao
 
 完成了command类的select，load函数;
 
