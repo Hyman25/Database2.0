@@ -13,7 +13,7 @@ SOCKADDR_IN addrServer;
 SOCKET sockClient;
 SOCKADDR_IN addrClient;
 
-void Link()
+void LinkAsServer()
 {
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	sockServer = socket(AF_INET, SOCK_STREAM, 0);
@@ -77,7 +77,7 @@ void Link()
 	WSACleanup();
 }
 
-void LinkClient(){
+void LinkAsClient(){
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	//新建客户端socket
 	sockClient = socket(AF_INET, SOCK_STREAM, 0);

@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <iostream>
 #include <algorithm>
 #include <cmath>
 
@@ -15,10 +16,7 @@ public:
 	ALU(std::string str) :expression(str) {}
 	~ALU() = default;
 
-	std::string process();
-
-	friend std::vector<std::string> split(const std::string& str, const std::string& sep);
-	friend bool IsDouble(const std::string& result);
+	void process();
 
 private:
 	std::string expression;
@@ -27,9 +25,10 @@ private:
 
 	std::vector<std::string> Transfer(const std::vector<std::string>&);
 	std::string Calculate(const std::vector<std::string>&);
-
-	void ALUformat();
+	void output(const std::string& result);
+	void ALUformat(std::string& expression);
 };
 
+inline std::string toUpper(const std::string& str);
 bool IsDouble(const std::string& result);
 std::vector<std::string> split(const std::string& str, const std::string& sep);

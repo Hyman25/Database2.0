@@ -36,12 +36,12 @@ public:
 
 	std::map<Data, int> Count(std::string);
 	void LoadFile(std::string filename, std::vector<std::string> attrname);
-	void SaveFile(std::string filename, std::vector<std::string> attrname);
-	
-	void SelectData(const std::vector<std::string> attrName,
-		const std::string countAttr,
-		const std::string groupby,
-		const std::string orderbyAttr,
-		const std::string orderbyCount,
-		const std::string Where);
+
+	void SelectData(const std::vector<std::string>& attrName,
+		const std::string& countAttr,
+		const std::vector<std::string>& groupby,
+		const std::string& orderbyAttr,
+		const std::string& orderbyCount,
+		const std::string& Where,
+		const std::string& filename);
 };
