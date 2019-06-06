@@ -1,4 +1,6 @@
 ﻿#include "DatabaseMap.h"
+
+
 void DatabaseMap::CreateDatabase(std::string db_name) {
 	dbs[db_name] = Database(db_name);           //创立数据库
 }
@@ -11,7 +13,6 @@ void DatabaseMap::UseDatabase(std::string db_name) {
 void DatabaseMap::DropDatabase(std::string db_name) {
 	dbs.erase(db_name);                        //删除数据库
 }
-
 
 void DatabaseMap::ShowDatabases() {
 	for (std::map<std::string, Database>::iterator iter = dbs.begin(); iter != dbs.end(); iter++)
@@ -34,7 +35,6 @@ void DatabaseMap::DropTable(std::string table_name)
 
 void DatabaseMap::ShowTables()
 {
-	std::cout <<"Tables_in_"<< current_name << "\n" ;
 	current_db->ShowTables();
 }
 
@@ -98,15 +98,4 @@ std::set<Data> DatabaseMap::KeyWhereCluase(const std::string table_name, const C
 
 std::string DatabaseMap::getkeytype(const std::string table_name) {
 	return current_db->getkeytype(table_name);
-}
-
-void DatabaseMap::SelectData(const std::vector<std::string> attrName, 
-	const std::vector<std::string> countAttr, 
-	const std::vector<std::string> groupby, 
-	const std::string orderbyAttr, 
-	const std::string orderbyCount, 
-	const std::string Where,
-	const std::string outfile)
-{
-
 }

@@ -35,7 +35,16 @@ bool Data::operator== (const Data d) const {
 		return this->value == d.value;
 	}
 }
-//Not Null关键字缺乏对应实现
+Table::Table(std::vector<Attribute> attr, std::string _key) :attr_list(attr), key(_key)
+{
+	for (auto it = attr.begin(); it < attr.end(); it++) {
+		if ((*it).Key == true) {
+			key_type = (*it).type;
+			break;
+		}
+	}
+}
+//Not Null关键字缺乏对应实现！！
 void Table::insert(std::vector<std::string> attr_name, std::vector<std::string> value) {
 	Row new_row;
 	new_row.into(this, attr_name, value);
@@ -177,9 +186,4 @@ std::set<Data> Table::keywherecluase(const Clause c)
 		}
 	}
 	return keys;
-}
-
-std::map<Data, int> Table::Count(std::string)
-{
-	return std::map<Data, int>();
 }

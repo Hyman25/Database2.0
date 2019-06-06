@@ -8,17 +8,10 @@ void Database::DropTable(std::string tablename) {
 }
 
 void Database::ShowTables() {
+	std::cout << "Tables_in_" << db_name << "\n";
 	for (auto iter = table_list.begin(); iter != table_list.end(); iter++)
 		std::cout << iter->first << "\n";
 }
-
-struct Rule1 { //按各名称字典序从小到大排  
-	bool operator() (const Attribute& s1, const Attribute& s2) {
-		if (s1.name < s2.name)
-			return true;
-		return false;
-	}
-};
 
 void Database::ShowColumns(std::string tablename) {
 	std::cout << "Field" << "\t" << "Type" << "\t" << "Null" << "\t" << "Key" << "\t" << "Default" << "\t" << "Extra"<<"\n";
@@ -32,7 +25,6 @@ void Database::ShowColumns(std::string tablename) {
 			std::cout << "char(1)" << "\t";
 		else if (it->type == "double")
 			std::cout << "double" << "\t";
-		//std::cout << it.type << "\t";
 		if (it->Null == true)
 			std::cout << "YES" << "\t";
 		else

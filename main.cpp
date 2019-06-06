@@ -1,10 +1,8 @@
-﻿
-#include"Row.h"
+﻿#include"Row.h"
 #include"Table.h"
 #include "Database.h"
 #include "DatabaseMap.h"
 #include "Command.h"
-
 
 DatabaseMap DB;       
 
@@ -16,4 +14,3 @@ int main()
 		a.operate();
 	} 
 }
-
