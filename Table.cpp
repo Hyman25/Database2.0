@@ -192,3 +192,16 @@ std::map<Data, int> Table::Count(std::string)
 {
 	return std::map<Data, int>();
 }
+
+void Table::LoadFile(std::string filename, std::vector<std::string> attrname)
+{
+}
+
+void Table::SaveFile(std::string filename, std::vector<std::string> attrname)
+{
+}
+
+void Table::SelectData(const std::vector<std::string> attrName, const std::string countAttr, const std::string groupby, const std::string orderbyAttr, const std::string orderbyCount, const std::string Where)
+{
+}
+
