@@ -1,0 +1,50 @@
+﻿#pragma once
+#include <map>
+#include <string>
+#include "Database.h"
+#include <utility>
+#include <vector>
+
+
+class DatabaseMap {
+private:
+	std::map<std::string,Database> dbs;    
+	std::string current_name;   
+	Database* current_db = nullptr;         
+public:
+	DatabaseMap(){};
+	Database& getDatabase() { return *current_db; }
+
+	void CreateDatabase(std::string db_name);
+	void DropDatabase (std::string db_name);
+	void UseDatabase  (std::string db_name);
+	void ShowDatabases();
+	void InsertInto(std::string table_name, std::vector<std::string> attr_name, std::vector<std::string> value);
+	void CreateTable(std::string table_name, std::vector<Attribute> attr, std::string _key);
+	void DropTable(std::string table_name);     
+	void ShowTables();     
+	void ShowColumns(std::string table_name);
+
+	//返回数据表table_name里所有行的主键对应数据的集合
+	std::set<Data> GetAllKeys(const std::string table_name);
+	std::set<Data> KeyWhereCluase(const std::string table_name, const Clause c);     //查找给定表中符合条件c的所有Row，返回这些Row主键的集合
+	void DeleteRow(const std::string table_name, const std::string key);   //删除指定表中主键为key的行
+	//将表tablename中主键为key的行中的attr属性值更新为value
+	void Set(const std::string table_name, const std::string attr_name, const std::string value, const std::string key);   
+	//返回指定表，key对应行，attr对应列的数据
+	std::string GetValue(const std::string table_name, const std::string attr, const std::string key);    
+
+	std::string GetType(const std::string table_name, const std::string attr);    //返回指定表attr列的类型
+	void OutputAttr(const std::string table_name);    //调用指定表的OutputAttr
+	void OutputRow(const std::string table_name, const std::string key);     //找到对应Row，调用Row的output
+	std::string getkeytype(const std::string table_name);
+
+
+	void SelectData(const std::vector<std::string> attrName,
+		const std::vector<std::string> countAttr,
+		const std::vector<std::string> groupby,
+		const std::string orderbyAttr,
+		const std::string orderbyCount,
+		const std::string Where,
+		const std::string outfile);
+};
