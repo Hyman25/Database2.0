@@ -12,9 +12,9 @@ private:
 	std::string db_name;     //数据库的名字，不知道需不需要
 	std::map<std::string,Table> table_list;     //该数据库中表的集合,map<表名，表对象>
 public:
-	//std::map<std::string, Table> table_list;
-	Database() {};
+	Database() = default;
 	Database(std::string dbname) :db_name(dbname) {}
+
 	Table& getTable(std::string tablename) { return table_list[tablename]; }
 
 	void CreateTable(std::string table_name, std::vector<Attribute> attr, std::string _key);//更新1：建表
@@ -27,8 +27,7 @@ public:
 	void output(const std::string table_name);
 	void output(const std::string table_name, const std::string key);
 	std::string getkeytype(const std::string table_name);
+
 	friend class DatabaseMap;
-	//friend std::string DatabaseMap::GetValue(const std::string table_name, const std::string attr, const std::string key);
-	//friend std::string DatabaseMap::GetType(const std::string table_name, const std::string attr);
 };
 

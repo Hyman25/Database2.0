@@ -7,7 +7,6 @@
 
 class Table;
 struct Clause {
-	//bool identical = false;   //若为true则表示恒等式，不需要判断，直接返回true即可（对应 * ）
 	std::string left;   //被比较的属性,即stu_id
 	std::string right;   //给定值，一律做表达式的右侧值，即2018000000
 	std::string cmp_op;    //比较运算符，">","<","="
@@ -24,12 +23,12 @@ struct Attribute {
 
 class Row {
 private:
-	Table* table = nullptr;
+	Table* table = nullptr;//所属的数据表
 public:
-	Row() {}
-	std::map<std::string, std::string> data;
-	void into(Table* ta, std::vector<std::string> attr_name, std::vector<std::string> value);
+	std::map<std::string, std::string> data; //列名到数据的映射
+	void into(Table* ta, std::vector<std::string> attr_name, std::vector<std::string> value);//插入行
 	void outputrow(Table* ta);
+
 };
 
 void OutputData(std::string, std::string);

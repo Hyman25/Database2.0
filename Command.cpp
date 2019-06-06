@@ -3,7 +3,7 @@
 using std::vector;
 using std::string;
 using std::regex;
-void Link();
+
 vector<string> split(const string& str, const string& sep)
 {
 	vector<string> tmp;
@@ -20,30 +20,31 @@ vector<string> split(const string& str, const string& sep)
 	return tmp;
 }
 
-inline string getFirstSubstr(string& str, const char& sep) {
+inline string getFirstSubstr(string& str, const string& sep) {
 	string::size_type pos = str.find(sep);
 	if (pos != string::npos) {
 		string tmp = str.substr(0, pos);
 		str.erase(0, pos + 1);
 		return tmp;
 	}
-	else {
+	else {//将输出字符串清空，返回原字符串
 		string tmp = str;
 		str.clear();
 		return tmp;
 	}
 }
 
-inline void toUpper(string& str) {
-	for (int i = 0; i < str.size(); i++)
-		str[i] = toupper(str[i]);
+inline string toUpper(const string& str) {
+	string tmp(str);
+	for (int i = 0; i < tmp.size(); ++i)
+		tmp[i] = toupper(tmp[i]);
+	return tmp;
 }
 
 void Command::operate() {
 	FormatSQL();
 
-	string order = getFirstSubstr(buffer, ' ');
-	toUpper(order);
+	string order = toUpper(getFirstSubstr(buffer, " "));
 
 	if (order == "CREATE")
 		Create();
@@ -61,8 +62,8 @@ void Command::operate() {
 		Show();
 	else if (order == "USE")
 		Use();
-	else if (order == "INTERNET")
-		Link();
+	else if (order == "LOAD")
+		Load();
 }
 
 void Command::FormatSQL()
@@ -82,19 +83,19 @@ void Command::FormatSQL()
 	/*将=,()左右的空格去掉*/
 	reg = " ?(\\)|\\(|,|=) ?";
 	buffer = regex_replace(buffer, reg, "$1");
+
 }
 
 void Command::Create()
 {
-	string order = getFirstSubstr(buffer, ' ');
-	toUpper(order);
+	string order = toUpper(getFirstSubstr(buffer, " "));
 
 	if (order == "DATABASE") {
-		string dbname = getFirstSubstr(buffer, ' ');
+		string dbname = getFirstSubstr(buffer, " ");
 		if (!dbname.empty()) DB.CreateDatabase(dbname);
 	}
 	else if (order == "TABLE") {
-		string tableName = getFirstSubstr(buffer, '(');
+		string tableName = getFirstSubstr(buffer, "(");
 
 		//将( )转换成空格
 		regex reg("(\\(|\\))");
@@ -113,23 +114,23 @@ void Command::Create()
 		for (int i = 0; i < (int)TableAttr.size(); i++) {
 			vector<string> ColumnAttr = split(TableAttr[i], " ");
 
-			string PRIMARY = ColumnAttr[0], KEY = ColumnAttr[1];
-			toUpper(PRIMARY);
-			toUpper(KEY);
+			string PRIMARY = toUpper(ColumnAttr[0]), KEY = toUpper(ColumnAttr[1]);
+
 			if (PRIMARY == "PRIMARY" && KEY == "KEY" && ColumnAttr.size() == 3) {
 				PrimaryKey = ColumnAttr[2];
 				continue;
 			}
 			Attribute tmp;
 			tmp.name = ColumnAttr[0];
-			string& type = ColumnAttr[1];
-			toUpper(type);
+			string type = toUpper(ColumnAttr[1]);
+		
 			if (type == "INT")	tmp.type = "int";
 			else if (type == "CHAR") tmp.type = "char";
 			else if (type == "DOUBLE") tmp.type = "double";
 			else return;
 
-			tmp.Null = ((ColumnAttr.size() == 4) && (ColumnAttr[2] + " " + ColumnAttr[3] == "NOT NULL"));
+			tmp.Null = ((ColumnAttr.size() == 4) && 
+				(toUpper(ColumnAttr[2]) + " " + toUpper(ColumnAttr[3]) == "NOT NULL"));
 			
 			attr.push_back(tmp);
 		}
@@ -145,14 +146,14 @@ void Command::Create()
 }
 
 void Command::Use() {
-	string dbname = getFirstSubstr(buffer, ' ');
+	string dbname = getFirstSubstr(buffer, " ");
 	DB.UseDatabase(dbname);
 }
 
 void Command::Drop() {
 	vector<string> orders = split(buffer, " ");
 	if (orders.size() == 2) {
-		toUpper(orders[0]);
+		orders[0] = toUpper(orders[0]);
 		string name = orders[1];
 
 		if (orders[0] == "DATABASE")
@@ -166,7 +167,7 @@ void Command::Drop() {
 void Command::Show() {
 	vector<string> orders = split(buffer, " ");
 	if (orders.size() == 1) {
-		toUpper(orders[0]);
+		orders[0] = toUpper(orders[0]);
 		if (orders[0] == "DATABASES")
 			DB.ShowDatabases();
 		else if (orders[0] == "TABLES") {
@@ -174,8 +175,8 @@ void Command::Show() {
 		}
 	}
 	else if (orders.size() == 3) {
-		toUpper(orders[0]);
-		toUpper(orders[1]);
+		orders[0] = toUpper(orders[0]);
+		orders[1] = toUpper(orders[1]);
 		if (orders[0] + " " + orders[1] == "COLUMNS FROM") {
 			DB.ShowColumns(orders[2]);
 		}
@@ -186,14 +187,14 @@ void Command::Show() {
 }
 
 void Command::Update() {
-	string table_name = getFirstSubstr(buffer, ' ');
+	string table_name = getFirstSubstr(buffer, " ");
 
-	string SET = getFirstSubstr(buffer, ' '); toUpper(SET);
+	string SET = toUpper(getFirstSubstr(buffer, " "));
 	if (SET != "SET") return;  //输入异常
 
 	vector<std::pair<string, string> > UpdateAttr;
 
-	vector<string> UpdateTmp = split(getFirstSubstr(buffer, ' '), ",");
+	vector<string> UpdateTmp = split(getFirstSubstr(buffer, " "), ",");
 	for (int i = 0; i < UpdateTmp.size(); i++)
 	{
 		vector<string> Attr_tmp = split(UpdateTmp[i], "=");
@@ -203,7 +204,7 @@ void Command::Update() {
 		UpdateAttr.push_back(tmp);
 	}
 
-	string WHERE = getFirstSubstr(buffer, ' '); toUpper(WHERE);
+	string WHERE = toUpper(getFirstSubstr(buffer, " "));
 	if (WHERE != "WHERE") return;
 
 	std::set<Data> key_of_rows = where_clause(table_name, buffer);
@@ -214,30 +215,29 @@ void Command::Update() {
 }
 
 void Command::Insert() {
-	string INTO = getFirstSubstr(buffer, ' '); toUpper(INTO);
+	string INTO = toUpper(getFirstSubstr(buffer, " "));
 	if (INTO != "INTO") return;  //输入异常
 
-	string table_name = getFirstSubstr(buffer, '(');
+	string table_name = getFirstSubstr(buffer, "(");
 
-	vector<string> attr_list = split(getFirstSubstr(buffer, ')'), ",");
+	vector<string> attr_list = split(getFirstSubstr(buffer, ")"), ",");
 
-	string VALUES = getFirstSubstr(buffer, '('); toUpper(VALUES);
-
+	string VALUES = toUpper(getFirstSubstr(buffer, "("));
 	if (VALUES != "VALUES") return; //输入异常
 
-	vector<string> value_list = split(getFirstSubstr(buffer, ')'), ",");
+	vector<string> value_list = split(getFirstSubstr(buffer, ")"), ",");
 
 	DB.InsertInto(table_name, attr_list, value_list);
 }
 
 void Command::Delete() {
-	string FROM = getFirstSubstr(buffer, ' '); toUpper(FROM);
+	string FROM = toUpper(getFirstSubstr(buffer, " "));
 	if (FROM != "FROM") return;  //输入异常
 
-	string table_name = getFirstSubstr(buffer, ' ');
+	string table_name = getFirstSubstr(buffer, " ");
 
-	string WHERE = getFirstSubstr(buffer, ' '); toUpper(WHERE);
-	if (WHERE != "WHERE") return;  //输入异常
+	string WHERE = toUpper(getFirstSubstr(buffer, " "));
+	if (WHERE != "WHERE") return;
 
 	std::set<Data> key_of_rows = where_clause(table_name, buffer);
 	for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
@@ -246,12 +246,12 @@ void Command::Delete() {
 }
 
 void Command::Select() {
-	string attr_name = getFirstSubstr(buffer, ' ');
+	string attr_name = getFirstSubstr(buffer, " ");
 
-	string FROM = getFirstSubstr(buffer, ' '); toUpper(FROM);
+	string FROM = toUpper(getFirstSubstr(buffer, " "));
 	if (FROM != "FROM") return;  //输入异常
 
-	string table_name = getFirstSubstr(buffer, ' ');
+	string table_name = getFirstSubstr(buffer, " ");
 	std::set<Data> key_of_rows;
 
 	if (attr_name == "*") {
@@ -259,8 +259,8 @@ void Command::Select() {
 			key_of_rows = DB.GetAllKeys(table_name);
 		}
 		else {
-			string WHERE = getFirstSubstr(buffer, ' '); toUpper(WHERE);
-			if (WHERE != "WHERE") return;  //输入异常
+			string WHERE = toUpper(getFirstSubstr(buffer, " "));
+			if (WHERE != "WHERE") return;
 
 			key_of_rows = where_clause(table_name, buffer);
 		}
@@ -282,8 +282,8 @@ void Command::Select() {
 			key_of_rows = DB.GetAllKeys(table_name);
 		}
 		else {
-			string WHERE = getFirstSubstr(buffer, ' '); toUpper(WHERE);
-			if (WHERE != "WHERE") return;  //输入异常
+			string WHERE = toUpper(getFirstSubstr(buffer, " "));
+			if (WHERE != "WHERE") return;
 
 			key_of_rows = where_clause(table_name, buffer);
 		}
@@ -298,6 +298,41 @@ void Command::Select() {
 			}
 			std::cout << "\n";
 		}
+	}
+}
+
+void Command::Load()
+{
+	vector<string> orders = split(buffer, " ");
+	string fileName;
+	bool error = true;
+	if (orders.size() == 6 &&
+		toUpper(orders[0]) == "DATA" &&
+		toUpper(orders[1]) == "INFILE" &&
+		toUpper(orders[3]) == "INTO" &&
+		toUpper(orders[4]) == "TABLE") {
+		fileName = orders[2];
+		error = false;
+	}
+	else if (orders.size() == 7 &&
+		toUpper(orders[0]) == "DATA" &&
+		toUpper(orders[1]) == "LOCAL" &&
+		toUpper(orders[2]) == "INFILE" &&
+		toUpper(orders[4]) == "INTO" &&
+		toUpper(orders[5]) == "TABLE") {
+		fileName = orders[3];
+		error = false;
+	}
+	if (error) return; //报错模块
+	
+	string tableAttr = orders[orders.size() - 1], 
+		tableName=getFirstSubstr(tableAttr,"(");
+	vector<string> Columns;
+	if (!tableAttr.empty()) {
+		Columns = split(getFirstSubstr(tableAttr, ")"), ",");
+	}
+	else {
+
 	}
 }
 

@@ -25,12 +25,11 @@ private:
 	void Insert();
 	void Delete();
 	void Select();
+	void Load();
 
 	friend std::vector<string> split(const string& str, const string& sep);
-	friend inline void toUpper(string& str);
-	friend inline string getFirstSubstr(string& str, const char& sep);
+	friend inline string toUpper(const string& str);
+	friend inline string getFirstSubstr(string& str, const string& sep);
 };
 
-
 std::set<Data> where_clause(std::string table_name, std::string clause);
-
