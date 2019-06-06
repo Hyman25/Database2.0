@@ -1,9 +1,7 @@
 ﻿#include "Command.h"
-
 using std::vector;
 using std::string;
 using std::regex;
-
 vector<string> split(const string& str, const string& sep)
 {
 	vector<string> tmp;
@@ -64,6 +62,8 @@ void Command::operate() {
 		Use();
 	else if (order == "LOAD")
 		Load();
+	else if (order == "INTERNET")
+		Link();
 }
 
 void Command::FormatSQL()

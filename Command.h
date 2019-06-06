@@ -3,7 +3,7 @@
 #include <sstream>
 #include <regex>
 #include "DatabaseMap.h"
-
+void Link();
 extern DatabaseMap DB;
 
 using std::string;
