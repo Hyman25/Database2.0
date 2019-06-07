@@ -1,6 +1,7 @@
 # Database2.0 更新纪要
 
-推荐使用Typora编辑查看markdown文件。
+### 6.7 22：00 updated by zhanghexiao
+ALU模块现在可以支持比较运算符了，包括:=，<,>,>=,<=,<>,!=；
 
 ### 6.7 16:50 updated by HH
 
