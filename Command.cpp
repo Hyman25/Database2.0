@@ -257,7 +257,7 @@ void Command::Select() {
 	string str = buffer.substr(0, pos);
 	buffer.erase(0, pos);
 
-	if (buffer.empty()) {
+	if (buffer.empty()) {//没有form，必定是算术表达式
 		ALU expression(str);
 		expression.process();
 		return;
@@ -267,11 +267,15 @@ void Command::Select() {
 	if (FROM != "FROM") return;  //输入异常
 	string table_name = getFirstSubstr(buffer, " ");
 	Table& table = DB.getDatabase().getTable(table_name);
-
+	if (std::regex_search(str, ALU::operators)) {
+		ALU expression(str,&table);
+		expression.process();
+		return;
+	}
 
 	regex reg("INTO OUTFILE", regex::icase);//不区分大小写
 	bool toFile = false;//判断是否输出到文件
-	if (regex_match(str, reg)) {
+	if (regex_search(str, reg)) {
 		regex_replace(str, reg, "");
 		toFile = true;
 	}
@@ -319,7 +323,7 @@ void Command::Select() {
 			orderbyCount = getFirstSubstr(orderby, ")");
 	}
 
-	table.SelectData(Columns, CountAttr, countpos, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
+	table.SelectData(Columns, countpos, CountAttr, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
 }
 
 
