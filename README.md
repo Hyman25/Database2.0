@@ -2,6 +2,10 @@
 
 推荐使用Typora编辑查看markdown文件。
 
+### 6.7 16:50 updated by HH
+
+Internet的sever端通过recv返回值判断client端是否断开，防止client端意外关闭导致的sever端死循环。
+
 ### 6.7 12：00 updated by zhanghexiao
 
 现在可以使用“select (逻辑&算术表达式） from tablename;”的语法了，一个测试样例。
