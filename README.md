@@ -1,13 +1,13 @@
 # Database2.0 更新纪要
 
-### 6.7 22：00 updated by zhanghexiao
+### 6.7 22:00 updated by zhanghexiao
 ALU模块现在可以支持比较运算符了，包括:=,<,>,>=,<=,<>,!=；
 
 ### 6.7 16:50 updated by HH
 
 Internet的sever端通过recv返回值判断client端是否断开，防止client端意外关闭导致的sever端死循环。
 
-### 6.7 12：00 updated by zhanghexiao
+### 6.7 12:00 updated by zhanghexiao
 
 现在可以使用“select (逻辑&算术表达式） from tablename;”的语法了，一个测试样例。
 
@@ -41,10 +41,9 @@ SIN( stu_id * PI( ) )
 3.67394e-16
 ```
 
-### 6.7 9：30 updated by zhanghexiao
+### 6.7 9:30 updated by zhanghexiao
 
 现在远程访问模块已经调通了，在本机上比较稳定。
-大家可以尽情测试。
 
 ### 6.6 21:42 updated by zhanghexiao
 
