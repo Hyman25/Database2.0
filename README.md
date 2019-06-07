@@ -2,6 +2,11 @@
 
 推荐使用Typora编辑查看markdown文件。
 
+### 6.7 9：30 updated by zhanghexiao
+
+现在远程访问模块已经调通了，在本机上比较稳定。
+大家可以尽情测试。
+
 ### 6.6 21:42 updated by zhanghexiao
 
 完成了command类的select，load函数;
