@@ -14,15 +14,20 @@ map<string, int> ALU::priority = {
 	{"(",-1},{")",-1},{"ABS(",-1},{"SIN(",-1},{"COS(",-1},{"EXP(",-1} ,{"PI(",-1},
 	//逻辑运算符
 	{"||",1},{"OR",1},{"XOR",1},{"&&",2},{"AND",2},{"NOT",3},{"!",3},
+	//比较运算符
+	{"=",6},{">=",6},{"<=",6},{">",6},{"<",6},{"<>",6},{"!=",6},
 	//算术运算符
-	{"+",4},{"-",4},{"*",5},{"/",5},{"DIV",5},{"%",5},{"MOD",5},{"SIGN+",6},{"SIGN-",6}
+	{"+",10},{"-",10},{"*",11},{"/",11},{"DIV",11},{"%",11},{"MOD",11},{"SIGN+",13},{"SIGN-",13}
 };
 
 set<string> ALU::function = {
 	"ABS(","SIN(","EXP(","COS(","PI(","("
 };
 
-regex ALU::operators(" ?(\\+|-|\\*|/|%|(DIV)|(MOD)|(OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!|(ABS)|(SIN)|(COS)|(EXP)|(PI)) ?", regex::icase);
+regex ALU::operators("(\\+|-|\\*|\\/|%|(DIV)|"
+"(MOD)|(OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!|"
+"(ABS)|(SIN)|(COS)|(EXP)|(PI)|"
+">|<|=|(>=)|(<=)|(!=)|(<>))", regex::icase);
 
 void ALU::process()
 {
@@ -194,6 +199,19 @@ string ALU::Calculate(vector<string>& expression)
 		else if (expression[i] == "*")
 			nums.push(num1 * num2);
 
+		else if (expression[i] == ">")
+			nums.push((num2 > num1));
+		else if (expression[i] == "<")
+			nums.push((num2 < num1));
+		else if (expression[i] == "=")
+			nums.push((num2 == num1));
+		else if (expression[i] == ">=")
+			nums.push((num2 >= num1));
+		else if (expression[i] == "<=")
+			nums.push((num2 <= num1));
+		else if (expression[i] == "<>" || expression[i] == "!=")
+			nums.push((num2 != num1));
+
 		else {
 			if (!num1) return "NULL";//除以0报错,退出
 
@@ -223,16 +241,22 @@ void ALU::output(vector<string>& _expression)
 
 void ALU::ALUformat(string& str)
 {
-	regex reg(" ?(\\+|-|\\*|\\/|%|(DIV)|(MOD)|\\(|\\)) ?", regex::icase);
+	str = regex_replace(str, operators, " $1 ");
+	regex reg("(\\(|\\))");
 	str = regex_replace(str, reg, " $1 ");
-	regex reg1(" ?((OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!) ?", regex::icase);
-	str = regex_replace(str, reg1, " $1 ");
-	regex reg2(" ?((ABS)|(SIN)|(COS)|(EXP)|(PI)) ?", regex::icase);
-	str = regex_replace(str, reg2, " $1 ");
-	regex reg3("(^ +)|( +$)", regex::icase);
-	str = regex_replace(str, reg3, "");
-	regex reg4(" +", regex::icase);
-	str = regex_replace(str, reg4, " ");
+	reg="(^ +)|( +$)";
+	str = regex_replace(str, reg, "");
+	reg = " +";
+	str = regex_replace(str, reg, " ");
+	reg = "< *=";
+	str = regex_replace(str, reg, "<=");
+	reg = "> *=";
+	str = regex_replace(str, reg, ">=");
+	reg = "! *=";
+	str = regex_replace(str, reg, "!=");
+	reg = "< *>";
+	str = regex_replace(str, reg, "<>");
+
 	regex reg5("ABS *\\(", regex::icase);
 	str = regex_replace(str, reg5, "ABS(");
 	regex reg6("SIN *\\(", regex::icase);
