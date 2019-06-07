@@ -43,7 +43,7 @@ void LinkAsServer()
 		//  将in_addr转换为主机字节序
 		char* strIp = ::inet_ntoa(addr);
 		//  输出
-		cout << endl << "————————————————" << endl;
+		cout << "————————————————" << endl;
 		printf("本机IP[%d]:%s\n", i + 1, strIp);
 	}
 
@@ -65,8 +65,13 @@ void LinkAsServer()
 		//接收并打印客户端数据
 		recv(sockClient, recvBuf, 1000, 0);
 		cout << recvBuf << endl;
-		if (memcmp(recvBuf, "exit", sizeof("exit")) == 0)
+		string buf(recvBuf);
+
+		regex reg("\n");//不知道为什么有时候exit前面会有\n
+		buf = regex_replace(buf, reg, "");
+		if (toUpper(buf) == "EXIT")
 			break;
+
 		streambuf* coutBuf = cout.rdbuf();
 
 		ofstream of("out.txt");
@@ -111,8 +116,8 @@ void LinkAsClient() {
 	//定义要连接的服务端地址
 	std::string s;
 	int port;
-	cout << "————连接服务器————" << endl;
-	std::cout << "输入要连接的Ip地址与端口号" << std::endl;
+	cout << "————————————————" << endl;
+	std::cout << "输入要连接的Ip地址与端口号：" << std::endl;
 	std::cin >> s >> port; getchar();
 	addrServer.sin_addr.S_un.S_addr = inet_addr(s.c_str());//目标IP(127.0.0.1是回送地址)
 	addrServer.sin_family = AF_INET;
@@ -125,26 +130,33 @@ void LinkAsClient() {
 		cout << "ERROR!\n";
 		return;
 	}
-	cout << "————————————————" << endl;
+
 	//发送数据
+	cout << "————连接服务器————" << endl;
 	string message;
 	while (true)
 	{
 		getline(cin, message, ';');
+
 		char* tmp = const_cast<char*>(message.c_str());
 		send(sockClient, message.c_str(), message.size() + 1, 0);
+
+		regex reg("\n");//不知道为什么有时候exit前面会有\n
+		message = regex_replace(message, reg, "");
+		if (toUpper(message) == "EXIT") break;
+
 		char buf[1000] = {};
-		if (memcmp(tmp, "exit", 4) == 0)
-		{
-			break;
-		}
 		error = recv(sockClient, buf, 1000, 0);
 
-		if (error == SOCKET_ERROR) cout << "ERROR!" << endl;
+		if (error == SOCKET_ERROR) {
+			cout << "ERROR!" << endl;
+			break;
+		}
 		else {
 			cout << message << " Done!" << endl;
 			cout << buf; //<< std::endl;
 		}
+
 	}
 	//关闭socket
 	closesocket(sockClient);
