@@ -15,7 +15,7 @@ map<string, int> ALU::priority = {
 	//¬ﬂº≠‘ÀÀ„∑˚
 	{"||",1},{"OR",1},{"XOR",1},{"&&",2},{"AND",2},{"NOT",3},{"!",3},
 	//À„ ı‘ÀÀ„∑˚
-	{"+",4},{"-",4},{"*",5},{"/",5},{"DIV",5},{"%",5},{"MOD",5},{"sign+",6},{"sign-",6}
+	{"+",4},{"-",4},{"*",5},{"/",5},{"DIV",5},{"%",5},{"MOD",5},{"SIGN+",6},{"SIGN-",6}
 };
 
 set<string> ALU::function = {
@@ -91,7 +91,7 @@ vector<string> ALU::Transfer(vector<string>& str)
 		{
 			if (tmp == "+" || tmp == "-")
 				if (i == 0 || function.find(str[i - 1]) != function.end()) {
-					operators.push("sign" + tmp);
+					operators.push("SIGN" + tmp);
 					continue;
 				}
 
@@ -150,11 +150,11 @@ string ALU::Calculate(vector<string>& expression)
 			nums.push(!num1);
 			continue;
 		}
-		else if (expression[i] == "sign+") {
+		else if (expression[i] == "SIGN+") {
 			nums.push(num1);
 			continue;
 		}
-		else if (expression[i] == "sign-") {
+		else if (expression[i] == "SIGN-") {
 			nums.push(-num1);
 			continue;
 		}
