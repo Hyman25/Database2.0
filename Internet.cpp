@@ -63,7 +63,8 @@ void LinkAsServer()
 	while (true)
 	{
 		//接收并打印客户端数据
-		recv(sockClient, recvBuf, 1000, 0);
+		if (recv(sockClient, recvBuf, 1000, 0) <= 0)
+			break;
 		cout << recvBuf << endl;
 		string buf(recvBuf);
 
