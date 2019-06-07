@@ -22,34 +22,60 @@ set<string> ALU::function = {
 	"ABS(","SIN(","EXP(","COS(","PI(","("
 };
 
+regex ALU::operators(" ?(\\+|-|\\*|/|%|(DIV)|(MOD)|(OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!|(ABS)|(SIN)|(COS)|(EXP)|(PI)) ?", regex::icase);
+
 void ALU::process()
 {
-	//string tmp_expression = toUpper(expression);
-	expression = toUpper(expression);
+
 	ALUformat(expression);
+	std::cout << expression << std::endl;
 	vector<string> ex_split = split(expression, " ");
 	ex_split = Transfer(ex_split);
-
-	string result = Calculate(ex_split);
-	output(result);
-	
+	if (!table) {
+		output(ex_split);
+	}
+	else
+	{
+		set<string> Columns;
+		vector<int> isColumns_index;
+		for (auto i : table->attr_list)
+			Columns.insert(i.name);
+		for (int i = 0; i < (int)ex_split.size(); i++) {
+			if (Columns.find(ex_split[i]) != Columns.end())
+			{
+				isColumns_index.push_back(i);
+			}
+		}
+		vector<string> tmp_ex_split(ex_split);
+		for (auto i : table->row_map) {
+			for (int j = 0; j < (int)isColumns_index.size(); j++) {
+				string ColumnName = ex_split[isColumns_index[j]];
+				string rowData = i.second.data[ColumnName];
+				if (IsDouble(rowData))
+					tmp_ex_split[isColumns_index[j]] = rowData;
+				else tmp_ex_split[isColumns_index[j]] = "0";
+			}
+			
+			output(tmp_ex_split);
+		}
+	}
 }
 
-vector<string> ALU::Transfer(const vector<string>& str)
+vector<string> ALU::Transfer(vector<string>& str)
 {
 	vector<string> result;
 	stack<string> operators;
 	if (str.empty()) return str;
 
-	for (int i = 0; i < str.size(); ++i)
-	{	//如果是数字
-		if (priority.find(str[i]) == priority.end())
-			result.push_back(str[i]);
-		//如果是左括号标记
-		else if (function.find(str[i]) != function.end())
-			operators.push(str[i]);
+	for (int i = 0; i < (int)str.size(); ++i)
+	{
+		
+		string tmp = toUpper(str[i]);
+		//如果是左括号或函数
+		if (function.find(tmp) != function.end())
+			operators.push(tmp);
 		//如果是右括号
-		else if (str[i] == ")") {
+		else if (tmp == ")") {
 			string op = operators.top();
 			while (function.find(op) == function.end()) {
 				result.push_back(op);
@@ -60,18 +86,20 @@ vector<string> ALU::Transfer(const vector<string>& str)
 				result.push_back(op);
 			operators.pop();
 		}
-		else
+		//如果是算术或逻辑运算符
+		else if (priority.find(tmp) != priority.end())
 		{
-			if (str[i] == "+" || str[i] == "-")
+			if (tmp == "+" || tmp == "-")
 				if (i == 0 || function.find(str[i - 1]) != function.end()) {
-					operators.push("sign" + str[i]);
+					operators.push("sign" + tmp);
 					continue;
 				}
 
-			int weight = priority[str[i]];
+			int weight = priority[tmp];
 			if (operators.empty() || weight > priority[operators.top()])
-				operators.push(str[i]);
-			else {
+				operators.push(tmp);
+			else
+			{
 				while (!operators.empty())
 				{
 					string op = operators.top();
@@ -82,9 +110,11 @@ vector<string> ALU::Transfer(const vector<string>& str)
 					}
 					else break;
 				}
-				operators.push(str[i]);
+				operators.push(tmp);
 			}
 		}
+		//如果是数字或列名
+		else result.push_back(str[i]);
 	}
 	while (!operators.empty())
 	{
@@ -95,10 +125,10 @@ vector<string> ALU::Transfer(const vector<string>& str)
 	return result;
 }
 
-string ALU::Calculate(const vector<string>& expression)
+string ALU::Calculate(vector<string>& expression)
 {
 	stack<double> nums;
-	for (int i = 0; i < expression.size(); ++i)
+	for (int i = 0; i <(int)expression.size(); ++i)
 	{
 		if (IsDouble(expression[i])) {
 			nums.push(stod(expression[i]));
@@ -182,39 +212,43 @@ string ALU::Calculate(const vector<string>& expression)
 	return tmp;
 }
 
-void ALU::output(const string& result)
+void ALU::output(vector<string>& _expression)
 {
-	std::cout << expression << std::endl << result << std::endl;
+	
+	for (int i=0 ;i< (int)_expression.size();++i)
+		_expression[i] = toUpper(_expression[i]);
+	string result = Calculate(_expression);
+	std::cout << result << std::endl;
 }
 
 void ALU::ALUformat(string& str)
 {
-	regex reg(" ?(\\+|-|\\*|/|%|(DIV)|(MOD)|\\(|\\)) ?");
+	regex reg(" ?(\\+|-|\\*|\\/|%|(DIV)|(MOD)|\\(|\\)) ?", regex::icase);
 	str = regex_replace(str, reg, " $1 ");
-	reg = " ?((OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!) ?";
-	str = regex_replace(str, reg, " $1 ");
-	reg = " ?((ABS)|(SIN)|(COS)|(EXP)|(PI)) ?";
-	str = regex_replace(str, reg, " $1 ");
-	reg = "(^ +)|( +$)";
-	str = regex_replace(str, reg, "");
-	reg = " +";
-	str = regex_replace(str, reg, " ");
-	reg = "ABS *\\(";
-	str = regex_replace(str, reg, "ABS(");
-	reg = "SIN *\\(";
-	str = regex_replace(str, reg, "SIN(");
-	reg = "COS *\\(";
-	str = regex_replace(str, reg, "COS(");
-	reg = "EXP *\\(";
-	str = regex_replace(str, reg, "EXP(");
-	reg = "PI *\\(";
-	str = regex_replace(str, reg, "PI(");
+	regex reg1(" ?((OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!) ?", regex::icase);
+	str = regex_replace(str, reg1, " $1 ");
+	regex reg2(" ?((ABS)|(SIN)|(COS)|(EXP)|(PI)) ?", regex::icase);
+	str = regex_replace(str, reg2, " $1 ");
+	regex reg3("(^ +)|( +$)", regex::icase);
+	str = regex_replace(str, reg3, "");
+	regex reg4(" +", regex::icase);
+	str = regex_replace(str, reg4, " ");
+	regex reg5("ABS *\\(", regex::icase);
+	str = regex_replace(str, reg5, "ABS(");
+	regex reg6("SIN *\\(", regex::icase);
+	str = regex_replace(str, reg6, "SIN(");
+	regex reg7("COS *\\(", regex::icase);
+	str = regex_replace(str, reg7, "COS(");
+	regex reg8("EXP *\\(", regex::icase);
+	str = regex_replace(str, reg8, "EXP(");
+	regex reg9("PI *\\(", regex::icase);
+	str = regex_replace(str, reg9, "PI(");
 }
 
 bool IsDouble(const string& result) {
 	if (result.empty()) return false;
 	const char* tmp_char = result.c_str();
-	for (int j = 0; j < result.size(); ++j)
+	for (int j = 0; j < (int)result.size(); ++j)
 		if (!isdigit(tmp_char[j]) && tmp_char[j] != '.') {
 			return false;
 		}
