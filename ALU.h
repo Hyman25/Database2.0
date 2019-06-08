@@ -15,25 +15,24 @@
 class ALU
 {
 public:
-	ALU(std::string str) :expression(str) ,table(nullptr){}
-	ALU(std::string _expression, Table* _table) :expression(_expression) { table = _table; }
+	ALU(std::string str) :expression(str){}
 	~ALU() = default;
 
-	void process();
-	friend class Command;
+	std::vector<std::string> process();
+	std::vector<std::string> process(Table* table, const std::vector<Data>& keys);
+
+	static bool IsALU(std::string str);
+
 
 private:
 	std::string expression;
 	static std::map<std::string, int> priority;
 	static std::set<std::string> function;
 	static std::regex operators;
-	Table* table;
 
-	std::vector<std::string> Transfer(std::vector<std::string>&);
+	static std::vector<std::string> Transfer(std::vector<std::string>&);
+	static std::string Calculate(std::vector<std::string>&);
 
-	std::string Calculate(std::vector<std::string>&);
-	
-	void output(std::vector<std::string>& expression);
 	void ALUformat(std::string& expression);
 };
 
