@@ -34,7 +34,7 @@ inline string getFirstSubstr(string& str, const string& sep) {
 
 inline string toUpper(const string& str) {
 	string tmp(str);
-	for (int i = 0; i < tmp.size(); ++i)
+	for (int i = 0; i < (int)tmp.size(); ++i)
 		tmp[i] = toupper(tmp[i]);
 	return tmp;
 }
@@ -197,7 +197,7 @@ void Command::Update() {
 	vector<std::pair<string, string> > UpdateAttr;
 
 	vector<string> UpdateTmp = split(getFirstSubstr(buffer, " "), ",");
-	for (int i = 0; i < UpdateTmp.size(); i++)
+	for (int i = 0; i < (int)UpdateTmp.size(); i++)
 	{
 		vector<string> Attr_tmp = split(UpdateTmp[i], "=");
 		if (Attr_tmp.size() != 2) return;
@@ -267,34 +267,37 @@ void Command::Select() {
 	if (FROM != "FROM") return;  //输入异常
 	string table_name = getFirstSubstr(buffer, " ");
 	Table& table = DB.getDatabase().getTable(table_name);
-	if (std::regex_search(str, ALU::operators)) {
-		ALU expression(str,&table);
+
+	regex reg("(count\\(\\*\\)|^\\*)",regex::icase);
+	if (std::regex_search(str, ALU::operators) && !std::regex_search(str, reg)) {
+		ALU expression(str, &table);
 		expression.process();
 		return;
 	}
 
-	regex reg("INTO OUTFILE", regex::icase);//不区分大小写
+	regex reg2(" ?INTO OUTFILE ?", regex::icase);//不区分大小写
 	bool toFile = false;//判断是否输出到文件
-	if (regex_search(str, reg)) {
-		regex_replace(str, reg, "");
+	if (regex_search(str, reg2)) {
+		str = regex_replace(str, reg2, " ");
 		toFile = true;
 	}
 	string tmpColumns = getFirstSubstr(str," ");
 
 	if (tmpColumns == "*") {
-		for (int i = 0; i < table.attr_list.size(); ++i) {
+		for (int i = 0; i < (int)table.attr_list.size(); ++i) {
 			Columns.push_back(table.attr_list[i].name);
-			countpos = i;
 		}
 	}
 
 	else {
 		Columns = split(tmpColumns, ",");
-		for (auto i : Columns) {
-			string COUNT = getFirstSubstr(i, "(");
-			if (toUpper(COUNT) != "COUNT") continue;
-
-			CountAttr = getFirstSubstr(i, ")");
+		for (int i = 0; i < (int)Columns.size(); ++i) {
+			string tmp = Columns[i];
+			string COUNT = getFirstSubstr(tmp, "(");
+			if (toUpper(COUNT) == "COUNT") {
+				countpos = i;
+				CountAttr = getFirstSubstr(tmp, ")");
+			}
 		}
 	}
 	if (toFile) FileName = str;
@@ -323,7 +326,7 @@ void Command::Select() {
 			orderbyCount = getFirstSubstr(orderby, ")");
 	}
 
-	table.SelectData(Columns, countpos, CountAttr, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
+	table.SelectData(Columns, CountAttr,countpos, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
 }
 
 
@@ -377,7 +380,7 @@ std::set<Data> where_clause(std::string table_name, std::string clause) {
 		std::string str;
 		ss >> str;
 		int i = 0;
-		for (; i < str.length(); i++) {
+		for (; i < (int)str.length(); i++) {
 			if (str[i] == '=' || str[i] == '<' || str[i] == '>') {
 				c.cmp_op = str[i];
 				break;
