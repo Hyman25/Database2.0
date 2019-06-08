@@ -1,5 +1,9 @@
 # Database2.0 更新纪要
 
+### 6.8 16:15 updated by zhanghx
+
+select函数改了一堆bug；现在急需更多测试样例。
+
 ### 6.9 14:49 updated by HH
 SelectData中，select支持运算式，group by支持运算式，order by支持运算式。
 
