@@ -1,6 +1,27 @@
 # Database2.0 更新纪要
 
-## 6.8 10:40 updated by HH
+### 6.8 12:05 updated by zhanghx
+
+更新了ALU类，现在算术逻辑运算的结果将不在ALU类中输出，而是作为一个vector<string>对象返回。
+
+更新了command类select函数调用ALU类的方式，作为参考。
+
+```mysql
+insert into oop_info(stu_id, stu_name) values (1,"a");
+insert into oop_info(stu_id, stu_name) values (2,"b");
+insert into oop_info(stu_id, stu_name) values (3,"c");
+select 1+stu_id from oop_info;
+```
+
+调用时：
+
+```c++
+ALU obj("1+std");
+obj(table*, vector<string> keys)//oop_info的指针,假如keys={"1","2","3"}
+    //将返回{”2“，”3“，”4“}
+```
+
+### 6.8 10:40 updated by HH
 修复了Table中SelectData的bug：即当select结果为空仍然输出表头。
 
 修复CreateTable中的bug：即null值与标准输出相反。
