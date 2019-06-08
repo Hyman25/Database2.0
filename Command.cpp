@@ -131,7 +131,7 @@ void Command::Create()
 			else if (type == "DOUBLE") tmp.type = "double";
 			else return;
 
-			tmp.Null = ((ColumnAttr.size() == 4) && 
+			tmp.Null = !((ColumnAttr.size() == 4) && 
 				(toUpper(ColumnAttr[2]) + " " + toUpper(ColumnAttr[3]) == "NOT NULL"));
 			
 			attr.push_back(tmp);
