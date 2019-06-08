@@ -354,7 +354,7 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 		std::cout.rdbuf(fileBuf);
 	}
 	
-	if (filename.empty())
+	if (filename.empty() && !SelectResult.empty())
 		for (auto i = attrName.begin(); i < attrName.end(); i++) 
 		{
 			std::cout << (*i) << (i == attrName.end() - 1 ? "\n" : "\t");
