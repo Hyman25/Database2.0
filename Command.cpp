@@ -131,8 +131,8 @@ void Command::Create()
 			else if (type == "DOUBLE") tmp.type = "double";
 			else return;
 
-			tmp.Null = !((ColumnAttr.size() == 4) && 
-				(toUpper(ColumnAttr[2]) + " " + toUpper(ColumnAttr[3]) == "NOT NULL"));
+			tmp.Null = !(((ColumnAttr.size() == 4) && 
+				(toUpper(ColumnAttr[2]) + " " + toUpper(ColumnAttr[3]) == "NOT NULL")));
 			
 			attr.push_back(tmp);
 		}
@@ -258,8 +258,18 @@ void Command::Select() {
 	buffer.erase(0, pos);
 
 	if (buffer.empty()) {//没有form，必定是算术表达式
-		ALU expression(str);
-		expression.process();
+		vector<string> expressions=split(str,",");
+		vector<vector<string> > results;
+		for (auto i : expressions) {
+			ALU expression(i);
+			results.push_back(expression.process());
+		}
+		for (int i = 0; i < 2; i++) {
+			for (auto j : results) {
+				std::cout << j[i] << "\t";
+			}
+			std::cout << std::endl;
+		}
 		return;
 	}
 
@@ -268,17 +278,19 @@ void Command::Select() {
 	string table_name = getFirstSubstr(buffer, " ");
 	Table& table = DB.getDatabase().getTable(table_name);
 
-	regex reg("(count\\(\\*\\)|^\\*)",regex::icase);
-	if (std::regex_search(str, ALU::operators) && !std::regex_search(str, reg)) {
-		ALU expression(str, &table);
-		expression.process();
+	/*if (ALU::IsALU(str)) {
+		ALU expression(str);
+		vector<string>result = expression.process(&table,table.getallkeys());
+		std::cout << str << std::endl;
+		for(auto i:result)
+			std::cout << i << std::endl;
 		return;
-	}
+	}*/
 
-	regex reg2(" ?INTO OUTFILE ?", regex::icase);//不区分大小写
+	regex reg(" ?INTO OUTFILE ?", regex::icase);//不区分大小写
 	bool toFile = false;//判断是否输出到文件
-	if (regex_search(str, reg2)) {
-		str = regex_replace(str, reg2, " ");
+	if (regex_search(str, reg)) {
+		str = regex_replace(str, reg, " ");
 		toFile = true;
 	}
 	string tmpColumns = getFirstSubstr(str," ");

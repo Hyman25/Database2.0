@@ -29,41 +29,59 @@ regex ALU::operators("(\\+|-|\\*|\\/|%|(DIV)|"
 "(ABS)|(SIN)|(COS)|(EXP)|(PI)|"
 ">|<|=|(>=)|(<=)|(!=)|(<>))", regex::icase);
 
-void ALU::process()
+std::vector<std::string> ALU::process()
 {
-
+	vector<string> result;
 	ALUformat(expression);
-	std::cout << expression << std::endl;
+	result.push_back(expression);
 	vector<string> ex_split = split(expression, " ");
 	ex_split = Transfer(ex_split);
-	if (!table) {
-		output(ex_split);
-	}
-	else
-	{
-		set<string> Columns;
-		vector<int> isColumns_index;
-		for (auto i : table->attr_list)
-			Columns.insert(i.name);
-		for (int i = 0; i < (int)ex_split.size(); i++) {
-			if (Columns.find(ex_split[i]) != Columns.end())
-			{
-				isColumns_index.push_back(i);
-			}
-		}
-		vector<string> tmp_ex_split(ex_split);
-		for (auto i : table->row_map) {
-			for (int j = 0; j < (int)isColumns_index.size(); j++) {
-				string ColumnName = ex_split[isColumns_index[j]];
-				string rowData = i.second.data[ColumnName];
-				if (IsDouble(rowData))
-					tmp_ex_split[isColumns_index[j]] = rowData;
-				else tmp_ex_split[isColumns_index[j]] = "0";
-			}
-			
-			output(tmp_ex_split);
+	for (int i = 0; i < (int)ex_split.size(); ++i)
+		ex_split[i] = toUpper(ex_split[i]);
+	result.push_back(Calculate(ex_split));
+	return result;
+}
+
+vector<string> ALU::process(Table * table,const vector<Data>& keys)
+{
+	ALUformat(expression);
+	vector<string> ex_split = split(expression, " ");
+	ex_split = Transfer(ex_split);
+
+	set<string> Columns;
+	vector<int> isColumns_index;
+	for (auto i : table->attr_list)
+		Columns.insert(i.name);
+	for (int i = 0; i < (int)ex_split.size(); i++) {
+		if (Columns.find(ex_split[i]) != Columns.end())
+		{
+			isColumns_index.push_back(i);
 		}
 	}
+	vector<string> tmp_ex_split(ex_split), result;
+
+	for (auto i : keys) {
+		Row& row = table->row_map[i];
+		for (int j = 0; j < (int)isColumns_index.size(); j++) {
+			string ColumnName = ex_split[isColumns_index[j]];
+			string rowData = row.data[ColumnName];
+			if (IsDouble(rowData))
+				tmp_ex_split[isColumns_index[j]] = rowData;
+			else tmp_ex_split[isColumns_index[j]] = "0";
+		}
+		for (int i = 0; i < (int)tmp_ex_split.size(); ++i)
+			tmp_ex_split[i] = toUpper(tmp_ex_split[i]);
+		result.push_back(Calculate(tmp_ex_split));
+	}
+	return result;
+}
+
+bool ALU::IsALU(std::string str)
+{
+	regex reg("(count\\(\\*\\)|^\\*)", regex::icase);
+	if (std::regex_search(str, operators) && !std::regex_search(str, reg))
+		return true;
+	return false;
 }
 
 vector<string> ALU::Transfer(vector<string>& str)
@@ -228,15 +246,6 @@ string ALU::Calculate(vector<string>& expression)
 	stream << result;
 	string tmp = stream.str();
 	return tmp;
-}
-
-void ALU::output(vector<string>& _expression)
-{
-	
-	for (int i=0 ;i< (int)_expression.size();++i)
-		_expression[i] = toUpper(_expression[i]);
-	string result = Calculate(_expression);
-	std::cout << result << std::endl;
 }
 
 void ALU::ALUformat(string& str)
