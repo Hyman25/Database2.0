@@ -2,6 +2,7 @@
 
 ## 6.8 10:40 updated by HH
 修复了Table中SelectData的bug：即当select结果为空仍然输出表头。
+
 修复CreateTable中的bug：即null值与标准输出相反。
 
 ### 6.8 10:26 updated by HH
@@ -26,8 +27,6 @@ Select前端传入数据说明:
 		const std::string& filename);
 ```
 
-
-
 ```mysql
 SELECT stu_name, COUNT(*) from oop_info GROUP BY stu_name ORDER BY COUNT(*);
 #attrname={"stu_name","COUNT(*)"},countAttr="*",countpos=1,groupby={"stu_name"}，orderbucount="*"
@@ -38,7 +37,6 @@ SELECT stu_name, COUNT(*) from oop_info GROUP BY stu_name ORDER BY COUNT(*);
 SELECT * INTO OUTFILE 'output_file' FROM oop_info;
 #attrname={"stu_id","stu_name"},countpos=-1,filename="output_file"
 ```
-
 
 ### 6.8 9:38 updated by HH
 **select** 基础功能模块完成
@@ -63,7 +61,7 @@ insert into oop_info(stu_id, stu_name) values (2,"b");
 insert into oop_info(stu_id, stu_name) values (3,"c");
 select 1+stu_id from oop_info;
 select 1 and not stu_id from oop_info;
-select Sin(st_id*Pi()) from oop_info;
+select Sin(stu_id*Pi()) from oop_info;
 DROP DATABASE OOP;
 ```
 
