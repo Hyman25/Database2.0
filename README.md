@@ -56,7 +56,7 @@ insert into oop_info(stu_id, stu_name) values (2,"b");
 insert into oop_info(stu_id, stu_name) values (3,"c");
 select 1+stu_id from oop_info;
 select 1 and not stu_id from oop_info;
-select Sin(std_id*Pi()) from oop_info;
+select Sin(st_id*Pi()) from oop_info;
 DROP DATABASE OOP;
 ```
 
