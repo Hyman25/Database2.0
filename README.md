@@ -1,5 +1,8 @@
 # Database2.0 更新纪要
 
+## 6.8 10:40 updated by HH
+修复了Table中SelectData的bug：即当select结果为空仍然输出表头
+
 ### 6.8 10:26 updated by HH
 修复了Table中SelectData的bug
 
