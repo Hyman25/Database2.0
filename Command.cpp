@@ -298,7 +298,7 @@ void Command::Select() {
 		str = regex_replace(str, reg, " ");
 		pos = str.find_last_of(" ");
 		FileName = str.substr(pos + 1, str.size() - pos - 1);
-		str.erase(pos, str.size() - pos - 1);
+		str.erase(pos, str.size() - pos);
 	}
 	string tmpColumns = str;
 
