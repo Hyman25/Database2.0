@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "Table.h"
+struct Data;
 
 class ALU
 {

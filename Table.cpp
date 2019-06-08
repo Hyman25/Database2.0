@@ -299,18 +299,55 @@ void Table::Group(std::vector<Data>& SelectResult, std::vector<std::string> grou
 
 void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 {
+	std::string type;
+	for (auto x : attr_list)
+	{
+		if (x.name == orderbyAttr)
+		{
+			type = x.type;
+			break;
+		}
+	}
+
 	for (auto i = SelectResult.begin(); i < SelectResult.end(); i++)
 	{
 		std::vector<Data>::iterator cur = i;
 		for (auto j = i + 1; j < SelectResult.end(); j++)
 		{
-			if (row_map[*j].data[orderbyAttr] < row_map[*cur].data[orderbyAttr])
+			if (type == "int")
 			{
-				Data tmp = *cur;
-				*cur = *j;
-				*j = tmp;
-				cur = j;
+				int tmp1 = 0, tmp2 = 0;
+				if(row_map[*j].data[orderbyAttr]!="NULL") tmp2 = stoi(row_map[*j].data[orderbyAttr]);
+				if (row_map[*cur].data[orderbyAttr] != "NULL") tmp1 = stoi(row_map[*cur].data[orderbyAttr]);
+				if (tmp2 < tmp1)
+				{
+					Data tmp = *cur;
+					*cur = *j;
+					*j = tmp;
+					cur = j;
+				}
 			}
+			else if (type == "double")
+			{
+				double tmp1 = 0, tmp2 = 0;
+				if (row_map[*j].data[orderbyAttr] != "NULL") tmp2 = stod(row_map[*j].data[orderbyAttr]);
+				if (row_map[*cur].data[orderbyAttr] != "NULL") tmp1 = stod(row_map[*cur].data[orderbyAttr]);
+				if (tmp2 < tmp1)
+				{
+					Data tmp = *cur;
+					*cur = *j;
+					*j = tmp;
+					cur = j;
+				}
+			}
+			else
+				if (row_map[*j].data[orderbyAttr] < row_map[*cur].data[orderbyAttr])
+				{
+					Data tmp = *cur;
+					*cur = *j;
+					*j = tmp;
+					cur = j;
+				}
 		}
 	}
 }
@@ -325,10 +362,6 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 	const std::string& Where, 
 	const std::string& filename)
 {
-	std::map<Data, int> countResult;
-	if (!countAttr.empty())
-		countResult = Count(countAttr);
-
 	std::set<Data> tmp;
 	if (!Where.empty())
 		tmp = where_clause(name, Where);
@@ -337,14 +370,40 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 
 	std::vector<Data> SelectResult;
 	for (auto x : tmp)
-		SelectResult.push_back(x);
+		SelectResult.push_back(x);//结果转存到SelectResult中
 	
-	if (!groupby.empty()) // groupby非空
-		Group(SelectResult, groupby, countResult, orderbyCount);
+	int tmpAttrNum = 0;
+	std::vector<Data> tmpAttrKey = SelectResult;
+	for (auto x : attrName)//判断列名中是否含有运算式，若有，作为临时列加入表中，最后删除
+	{
+		ALU tmp(x);
+		if (tmp.IsALU(x)) 
+		{
+			tmpAttrNum++;
+			std::vector<std::string> value = tmp.process(this, tmpAttrKey);
+			Attribute tmpAttr;
+			tmpAttr.name = x;
+			tmpAttr.type = "double";
+			attr_list.push_back(tmpAttr);
+			int valueNum = 0;
+			for (auto key:SelectResult)
+			{
+				row_map[key].data[x] = value[valueNum++];
+			}
+		}
+	}
 
-	if (!orderbyAttr.empty())
+	std::map<Data, int> countResult;
+	if (!countAttr.empty())
+		countResult = Count(countAttr);//count运算
+
+	if (!groupby.empty()) // groupby非空
+		Group(SelectResult, groupby, countResult, orderbyCount);//对结果分组
+
+	if (!orderbyAttr.empty())//结果按照列名排序
 		OrderAttr(SelectResult, orderbyAttr);
 	
+	//以下开始输出
 	std::streambuf* coutBuf = std::cout.rdbuf();
 	std::ofstream of;
 	if (!filename.empty())//把输出定向到文件
@@ -354,13 +413,13 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 		std::cout.rdbuf(fileBuf);
 	}
 	
-	if (filename.empty() && !SelectResult.empty())
+	if (filename.empty() && !SelectResult.empty())//输出表头
 		for (auto i = attrName.begin(); i < attrName.end(); i++) 
 		{
 			std::cout << (*i) << (i == attrName.end() - 1 ? "\n" : "\t");
 		}
 
-	if ((int)attrName.size() == 1 && countpos == 0)
+	if ((int)attrName.size() == 1 && countpos == 0)//select后面只有count
 	{
 		int num = 0;
 		for (auto x : SelectResult)
@@ -368,7 +427,7 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 				num++;
 		std::cout << num << "\n";
 	}
-	else
+	else//select后面不只是count
 	{
 		for (auto key : SelectResult)
 		{
@@ -392,12 +451,25 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 		}
 	}
 
-	
-
-	if (!filename.empty())
+	if (!filename.empty())//关闭文件
 	{
 		of.flush();
 		of.close();
 		std::cout.rdbuf(coutBuf);
 	}
+	//输出结束
+
+	//若有临时列，删除
+	if (tmpAttrNum)
+	{
+		for (auto key : tmpAttrKey)
+		{
+			for (auto x = attr_list.end() - tmpAttrNum; x < attr_list.end(); x++)
+			{
+				row_map[key].data.erase(x->name);
+			}
+		}
+		attr_list.erase(attr_list.end() - tmpAttrNum, attr_list.end());
+	}
+
 }
