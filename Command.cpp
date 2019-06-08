@@ -19,6 +19,15 @@ vector<string> split(const string& str, const string& sep)
 	return tmp;
 }
 
+void trim(std::string& s)
+{
+	if (!s.empty())
+	{
+		s.erase(0, s.find_first_not_of(" "));
+		s.erase(s.find_last_not_of(" ") + 1);
+	}
+}
+
 inline string getFirstSubstr(string& str, const string& sep) {
 	string::size_type pos = str.find(sep);
 	if (pos != string::npos) {
@@ -315,7 +324,7 @@ void Command::Select() {
 	pos = tmp.find("GROUP");
 	if (pos == string::npos)
 		pos = tmp.find("ORDER");
-	whereclause = buffer.substr(0, pos);
+	whereclause = buffer.substr(0, pos); trim(whereclause);
 	buffer.erase(0, pos);
 	if (!whereclause.empty()) {
 		string WHERE = toUpper(getFirstSubstr(whereclause, " "));
@@ -325,7 +334,7 @@ void Command::Select() {
 	//提取group子句
 	tmp = toUpper(buffer);
 	pos = tmp.find("ORDER");
-	string tmp_group = buffer.substr(0, pos);
+	string tmp_group = buffer.substr(0, pos); trim(tmp_group);
 	buffer.erase(0, pos);
 	if (!tmp_group.empty()) {
 		string GROUP = toUpper(getFirstSubstr(tmp_group, " "));
@@ -342,7 +351,7 @@ void Command::Select() {
 		string BY = toUpper(getFirstSubstr(buffer, " "));
 		if (BY != "BY") return;
 	}
-	orderby = buffer;
+	orderby = buffer; trim(orderby);
 	tmp = orderby;
 	string COUNT = getFirstSubstr(tmp, "(");
 	if (toUpper(COUNT) == "COUNT")

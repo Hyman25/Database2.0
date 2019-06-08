@@ -33,6 +33,7 @@ private:
 void LinkAsServer();
 void LinkAsClient();
 inline string toUpper(const string& str);
+void trim(std::string& s);
 inline string getFirstSubstr(string& str, const string& sep);
 std::vector<string> split(const string& str, const string& sep);
 std::set<Data> where_clause(std::string table_name, std::string clause);
