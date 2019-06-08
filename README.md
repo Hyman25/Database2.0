@@ -1,5 +1,8 @@
 # Database2.0 更新纪要
 
+### 6.9 14:49 updated by HH
+SelectData中，select支持运算式，group by支持运算式，order by支持运算式。
+
 ### 6.8 12:20 updated by zhanghx
 
 现在不带列名的算术逻辑运算支持同时进行传入多个算式了。
