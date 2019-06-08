@@ -353,25 +353,23 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 		std::streambuf* fileBuf = of.rdbuf();
 		std::cout.rdbuf(fileBuf);
 	}
-
-	if (!attrName.empty())
-	{
-		int curpos = 0, countPrinted = 0;
-		if (countAttr.empty())
-			countPrinted = 1;
-		for (auto i = attrName.begin(); i < attrName.end(); i++) {
-			if (!countAttr.empty() && !countPrinted && curpos == countpos)
-			{
-				std::cout << "COUNT(" << countAttr << ")" << "\t";
-				countPrinted = 1;
-			}
-			std::cout << (*i) << ((i == attrName.end()-1 && countPrinted) ? "\n" : "\t");
-			curpos++;
+	
+	if (filename.empty())
+		for (auto i = attrName.begin(); i < attrName.end(); i++) 
+		{
+			std::cout << (*i) << (i == attrName.end() - 1 ? "\n" : "\t");
 		}
-		if (!countAttr.empty() && !countPrinted)
-			std::cout << "COUNT(" << countAttr << ")" << "\n";
 
-
+	if ((int)attrName.size() == 1 && countpos == 0)
+	{
+		int num = 0;
+		for (auto x : SelectResult)
+			if (countResult[x] == 1)
+				num++;
+		std::cout << num << "\n";
+	}
+	else
+	{
 		for (auto key : SelectResult)
 		{
 			int curpos = 0, countPrinted = 0;
@@ -385,7 +383,7 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 					std::cout << countResult[key] << "\t";
 					countPrinted = 1;
 				}
-				std::cout << row_map[key].data[*attr] << ((attr == attrName.end()-1 && countPrinted) ? "\n" : "\t");
+				std::cout << row_map[key].data[*attr] << ((attr == attrName.end() - 1 && countPrinted) ? "\n" : "\t");
 				curpos++;
 			}
 
@@ -393,15 +391,7 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 				std::cout << countResult[key] << "\n";
 		}
 	}
-	else
-	{
-		std::cout << "COUNT(" << countAttr << ")\n";
-		int num = 0;
-		for (auto x : SelectResult)
-			if ( countResult[x] == 1)
-				num++;
-		std::cout << num << "\n";
-	}
+
 	
 
 	if (!filename.empty())

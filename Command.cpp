@@ -326,7 +326,7 @@ void Command::Select() {
 			orderbyCount = getFirstSubstr(orderby, ")");
 	}
 
-	table.SelectData(Columns, CountAttr,countpos, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
+	table.SelectData(Columns, countpos, CountAttr,groupbyAttr, orderby, orderbyCount, whereclause, FileName);
 }
 
 
