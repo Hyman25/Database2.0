@@ -33,7 +33,7 @@ std::vector<std::string> ALU::process()
 {
 	vector<string> result;
 	ALUformat(expression);
-	result.push_back(expression);
+	//result.push_back(expression);
 	vector<string> ex_split = split(expression, " ");
 	ex_split = Transfer(ex_split);
 	for (int i = 0; i < (int)ex_split.size(); ++i)

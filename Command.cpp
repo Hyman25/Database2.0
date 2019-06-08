@@ -258,18 +258,19 @@ void Command::Select() {
 	buffer.erase(0, pos);
 
 	if (buffer.empty()) {//没有form，必定是算术表达式
-		vector<string> expressions=split(str,",");
+		vector<string> expressions = split(str, ",");
 		vector<vector<string> > results;
 		for (auto i : expressions) {
 			ALU expression(i);
 			results.push_back(expression.process());
+			std::cout << i << "\t";
 		}
-		for (int i = 0; i < 2; i++) {
-			for (auto j : results) {
-				std::cout << j[i] << "\t";
-			}
-			std::cout << std::endl;
+		std::cout << std::endl;
+
+		for (auto j : results) {
+			std::cout << j[0] << "\t";
 		}
+		std::cout << std::endl;
 		return;
 	}
 
