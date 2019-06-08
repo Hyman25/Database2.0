@@ -1,5 +1,38 @@
 # Database2.0 更新纪要
 
+### 6.8 9:54 updated by zhanghx
+
+修复了前端select函数的bug。
+
+Select前端传入数据说明:
+
+接口：
+
+```c++
+	void SelectData(const std::vector<std::string>& attrName,
+		const std::string& countAttr,
+		int countpos,
+		const std::vector<std::string>& groupby,
+		const std::string& orderbyAttr,
+		const std::string& orderbyCount,
+		const std::string& Where,
+		const std::string& filename);
+```
+
+
+
+```mysql
+SELECT stu_name, COUNT(*) from oop_info GROUP BY stu_name ORDER BY COUNT(*);
+#attrname={"stu_name","COUNT(*)"},countAttr="*",countpos=1,groupby={"stu_name"}，orderbucount="*"
+#其他项都为空
+```
+
+```mysql
+SELECT * INTO OUTFILE 'output_file' FROM oop_info;
+#attrname={"stu_id","stu_name"},countpos=-1,filename="output_file"
+```
+
+
 ### 6.8 9:38 updated by HH
 **select** 基础功能模块完成
 
