@@ -2,6 +2,7 @@
 using std::vector;
 using std::string;
 using std::regex;
+
 vector<string> split(const string& str, const string& sep)
 {
 	vector<string> tmp;
@@ -82,10 +83,9 @@ void Command::FormatSQL()
 	/*去除重复的空格*/
 	reg = " +";
 	buffer = regex_replace(buffer, reg, " ");
-	/*将=,()左右的空格去掉*/
-	reg = " ?(\\)|\\(|,|=) ?";
+	/*将,()左右的空格去掉*/
+	reg = " ?(\\)|\\(|,) ?";
 	buffer = regex_replace(buffer, reg, "$1");
-
 }
 
 void Command::Create()
@@ -254,7 +254,7 @@ void Command::Select() {
 
 	string tmp = toUpper(buffer);
 	string::size_type pos = tmp.find("FROM");//将select语句按照from关键词分开
-	string str = buffer.substr(0, pos);
+	string str = buffer.substr(0, pos-1);
 	buffer.erase(0, pos);
 
 	if (buffer.empty()) {//没有form，必定是算术表达式
@@ -277,24 +277,19 @@ void Command::Select() {
 	string FROM = toUpper(getFirstSubstr(buffer, " "));
 	if (FROM != "FROM") return;  //输入异常
 	string table_name = getFirstSubstr(buffer, " ");
+
+	if (!DB.existTable(table_name)) return;
 	Table& table = DB.getDatabase().getTable(table_name);
 
-	/*if (ALU::IsALU(str)) {
-		ALU expression(str);
-		vector<string>result = expression.process(&table,table.getallkeys());
-		std::cout << str << std::endl;
-		for(auto i:result)
-			std::cout << i << std::endl;
-		return;
-	}*/
-
 	regex reg(" ?INTO OUTFILE ?", regex::icase);//不区分大小写
-	bool toFile = false;//判断是否输出到文件
+
 	if (regex_search(str, reg)) {
 		str = regex_replace(str, reg, " ");
-		toFile = true;
+		pos = str.find_last_of(" ");
+		FileName = str.substr(pos + 1, str.size() - pos - 1);
+		str.erase(pos, str.size() - pos - 1);
 	}
-	string tmpColumns = getFirstSubstr(str," ");
+	string tmpColumns = str;
 
 	if (tmpColumns == "*") {
 		for (int i = 0; i < (int)table.attr_list.size(); ++i) {
@@ -313,10 +308,12 @@ void Command::Select() {
 			}
 		}
 	}
-	if (toFile) FileName = str;
 
 	tmp = toUpper(buffer);
 	pos = tmp.find("GROUP");//提取where子句
+	if (pos == string::npos)
+		pos = tmp.find("ORDER");
+
 	whereclause = buffer.substr(0, pos);
 	buffer.erase(0, pos);
 	if (!whereclause.empty()) {
@@ -329,7 +326,7 @@ void Command::Select() {
 		toUpper(tmp_orders[0]) == "GROUP" &&
 		toUpper(tmp_orders[1]) == "BY")
 		groupbyAttr = split(tmp_orders[2], ",");
-	if (tmp_orders.size() == 6 &&
+	if (tmp_orders.size() >= 6 &&
 		toUpper(tmp_orders[3]) == "ORDER" &&
 		toUpper(tmp_orders[4]) == "BY") {
 		orderby = tmp_orders[5];
@@ -366,9 +363,12 @@ void Command::Load()
 		error = false;
 	}
 	if (error) return; //报错模块
-	
-	string tableAttr = orders[orders.size() - 1], 
-		tableName=getFirstSubstr(tableAttr,"(");
+
+	string tableAttr = orders[orders.size() - 1],
+		tableName = getFirstSubstr(tableAttr, "(");
+
+	if (!DB.existTable(tableName))	return;
+
 	Table& table = DB.getDatabase().getTable(tableName);
 
 	vector<string> Columns;
@@ -384,6 +384,9 @@ void Command::Load()
 
 std::set<Data> where_clause(std::string table_name, std::string clause) {
 	//注意：这里默认每个条件句之内没有空格
+	regex reg(" ?(>|<|=) ?");
+	clause = regex_replace(clause, reg, "$1");
+
 	std::stringstream ss(clause);
 	std::vector<Clause> conditions;
 	std::vector<std::string> operators;

@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "Table.h"
+
 struct Data;
 
 class ALU
@@ -23,13 +24,13 @@ public:
 	std::vector<std::string> process(Table* table, const std::vector<Data>& keys);
 
 	static bool IsALU(std::string str);
-
+	static std::regex operators;
 
 private:
 	std::string expression;
 	static std::map<std::string, int> priority;
 	static std::set<std::string> function;
-	static std::regex operators;
+
 
 	static std::vector<std::string> Transfer(std::vector<std::string>&);
 	static std::string Calculate(std::vector<std::string>&);
@@ -39,4 +40,5 @@ private:
 
 inline std::string toUpper(const std::string& str);
 bool IsDouble(const std::string& result);
+std::string DoubleToString(const double value);
 std::vector<std::string> split(const std::string& str, const std::string& sep);

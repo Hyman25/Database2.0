@@ -33,7 +33,6 @@ std::vector<std::string> ALU::process()
 {
 	vector<string> result;
 	ALUformat(expression);
-	//result.push_back(expression);
 	vector<string> ex_split = split(expression, " ");
 	ex_split = Transfer(ex_split);
 	for (int i = 0; i < (int)ex_split.size(); ++i)
@@ -241,10 +240,9 @@ string ALU::Calculate(vector<string>& expression)
 				nums.push((int)num2 % (int)num1);
 		}
 	}
-	std::ostringstream stream;
+	
 	double result = nums.top();
-	stream << result;
-	string tmp = stream.str();
+	string tmp = DoubleToString(result);
 	return tmp;
 }
 
@@ -286,4 +284,24 @@ bool IsDouble(const string& result) {
 			return false;
 		}
 	return true;
+}
+
+std::string DoubleToString(const double value)
+{
+	string res = std::to_string(value);
+	auto pos = res.find('.');
+	if (pos == std::string::npos)
+		return res;
+
+	string tmp = res.substr(pos + 1, res.size() - pos - 1);
+	bool mark = false;
+	for (auto i : tmp) {
+		if (i != '0') {
+			mark = true;
+			break;
+		}
+	}
+	if (!mark) return res.substr(0, pos);
+
+	return res;
 }

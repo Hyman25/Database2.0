@@ -19,7 +19,7 @@ public:
 	DatabaseMap() {};
 	~DatabaseMap() = default;
 	Database& getDatabase() { return *current_db; }
-
+	bool existTable(std::string tablename);
 	void CreateDatabase(std::string db_name);
 	void DropDatabase(std::string db_name);
 	void UseDatabase(std::string db_name);
