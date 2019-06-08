@@ -1,7 +1,7 @@
 ﻿#include "Database.h"
 
 void Database::CreateTable(std::string table_name, std::vector<Attribute> attr, std::string _key) {
-	table_list[table_name] = Table(attr, _key);
+	table_list[table_name] = Table(table_name, attr, _key);
 }
 void Database::DropTable(std::string tablename) {
 	table_list.erase(tablename);
