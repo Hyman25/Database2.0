@@ -1,10 +1,18 @@
 # Database2.0 更新纪要
 
-### 6.8 12:05 updated by zhanghx
+### 6.8 12:20 updated by zhanghx
+
+现在不带列名的算术逻辑运算支持同时进行传入多个算式了。
+
+```mysql
+select 1+2,2+3;
+1+2     2+3
+3       5
+```
 
 更新了ALU类，现在算术逻辑运算的结果将不在ALU类中输出，而是作为一个vector<string>对象返回。
 
-更新了command类select函数调用ALU类的方式，作为参考。
+更新了command类select函数调用ALU类的方式。下例作为参考：
 
 ```mysql
 insert into oop_info(stu_id, stu_name) values (1,"a");
