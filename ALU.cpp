@@ -301,7 +301,10 @@ std::string DoubleToString(const double value)
 			break;
 		}
 	}
-	if (!mark) return res.substr(0, pos);
-
+	if (!mark) {
+		res = res.substr(0, pos);
+		if (res == "-0") res = "0";
+	}
+	
 	return res;
 }

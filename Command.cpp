@@ -252,9 +252,11 @@ void Command::Select() {
 	vector<string> Columns, groupbyAttr;
 	int countpos = -1;
 
-	string tmp = toUpper(buffer);
+	string tmp = toUpper(buffer), str;
 	string::size_type pos = tmp.find("FROM");//将select语句按照from关键词分开
-	string str = buffer.substr(0, pos-1);
+	if (pos != string::npos && tmp[pos - 1] == ' ')
+		str = buffer.substr(0, pos - 1);
+	else str = buffer.substr(0, pos);
 	buffer.erase(0, pos);
 
 	if (buffer.empty()) {//没有form，必定是算术表达式
@@ -308,12 +310,11 @@ void Command::Select() {
 			}
 		}
 	}
-
+	//提取where子句
 	tmp = toUpper(buffer);
-	pos = tmp.find("GROUP");//提取where子句
+	pos = tmp.find("GROUP");
 	if (pos == string::npos)
 		pos = tmp.find("ORDER");
-
 	whereclause = buffer.substr(0, pos);
 	buffer.erase(0, pos);
 	if (!whereclause.empty()) {
@@ -321,22 +322,34 @@ void Command::Select() {
 		if (WHERE != "WHERE") return;
 	}
 
-	vector<string> tmp_orders = split(buffer, " ");
-	if (tmp_orders.size() >= 3 &&
-		toUpper(tmp_orders[0]) == "GROUP" &&
-		toUpper(tmp_orders[1]) == "BY")
-		groupbyAttr = split(tmp_orders[2], ",");
-	if (tmp_orders.size() >= 6 &&
-		toUpper(tmp_orders[3]) == "ORDER" &&
-		toUpper(tmp_orders[4]) == "BY") {
-		orderby = tmp_orders[5];
-
-		string COUNT = getFirstSubstr(orderby, "(");
-		if (toUpper(COUNT) == "COUNT")
-			orderbyCount = getFirstSubstr(orderby, ")");
+	//提取group子句
+	tmp = toUpper(buffer);
+	pos = tmp.find("ORDER");
+	string tmp_group = buffer.substr(0, pos);
+	buffer.erase(0, pos);
+	if (!tmp_group.empty()) {
+		string GROUP = toUpper(getFirstSubstr(tmp_group, " "));
+		if (GROUP != "GROUP") return;
+		string BY = toUpper(getFirstSubstr(tmp_group, " "));
+		if (BY != "BY") return;
 	}
+	groupbyAttr = split(tmp_group, ",");
 
-	table.SelectData(Columns, countpos, CountAttr,groupbyAttr, orderby, orderbyCount, whereclause, FileName);
+	//提取order子句
+	if (!buffer.empty()) {
+		string ORDER = toUpper(getFirstSubstr(buffer, " "));
+		if (ORDER != "ORDER") return;
+		string BY = toUpper(getFirstSubstr(buffer, " "));
+		if (BY != "BY") return;
+	}
+	orderby = buffer;
+	tmp = orderby;
+	string COUNT = getFirstSubstr(tmp, "(");
+	if (toUpper(COUNT) == "COUNT")
+		orderbyCount = getFirstSubstr(tmp, ")");
+
+
+	table.SelectData(Columns, countpos, CountAttr, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
 }
 
 
