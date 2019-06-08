@@ -1,6 +1,13 @@
 ﻿#include "DatabaseMap.h"
 
 
+bool DatabaseMap::existTable(std::string tablename)
+{
+	if (!current_db)
+		return false;
+	return current_db->table_list.count(tablename);
+}
+
 void DatabaseMap::CreateDatabase(std::string db_name) {
 	dbs[db_name] = Database(db_name);           //创立数据库
 }
