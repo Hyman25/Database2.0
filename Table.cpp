@@ -1,4 +1,5 @@
 ﻿#include"Table.h"
+std::set<Data> where_clause(std::string table_name, std::string clause);
 
 bool Data::operator< (const Data d) const {
 	if (type == "int") {
@@ -35,7 +36,7 @@ bool Data::operator== (const Data d) const {
 		return this->value == d.value;
 	}
 }
-Table::Table(std::vector<Attribute> attr, std::string _key) :attr_list(attr), key(_key)
+Table::Table(std::string _name, std::vector<Attribute> attr, std::string _key) : name(_name), attr_list(attr), key(_key)
 {
 	for (auto it = attr.begin(); it < attr.end(); it++) {
 		if ((*it).Key == true) {
@@ -188,15 +189,225 @@ std::set<Data> Table::keywherecluase(const Clause c)
 	return keys;
 }
 
-std::map<Data, int> Table::Count(std::string)
-{
-	return std::map<Data, int>();
-}
-
 void Table::LoadFile(std::string filename, std::vector<std::string> attrname)
 {
+	std::ifstream fin;
+	fin.open(filename);
+	
+	while (!fin.eof())
+	{
+		std::vector<std::string> value;
+		std::string tmp;
+		std::getline(fin, tmp);
+		std::stringstream ss(tmp);
+		while (ss >> tmp)
+			value.push_back(tmp);
+		if(!tmp.empty())
+			insert(attrname, value);
+	}
+	fin.close();
 }
 
-void Table::SelectData(const std::vector<std::string>& attrName, const std::string& countAttr, const std::vector<std::string>& groupby, const std::string& orderbyAttr, const std::string& orderbyCount, const std::string& Where, const std::string& filename)
+std::map<Data, int> Table::Count(std::string name)//count函数，返回值为 <keyvalue, 1 or 0>
 {
+	std::map<Data, int> countResult;
+	
+	if (name != "*")
+	{	
+		for (auto itr : row_map)
+		{
+			if (itr.second.data[name] != "NULL")
+				countResult[itr.first] = 1;
+			else
+				countResult[itr.first] = 0;
+		}
+	}
+	else // name == "*"
+	{
+		for (auto itr : row_map)
+		{
+			bool nul = true;
+			for (auto rowval : itr.second.data)
+			{
+				if (rowval.second != "NULL")
+				{
+					nul = false;
+					countResult[itr.first] = 1;
+					break;
+				}
+				if (nul)
+					countResult[itr.first] = 0;
+			}
+		}
+	}
+
+	return countResult;
+}
+
+void Table::Group(std::vector<Data>& SelectResult, std::vector<std::string> groupby, std::map<Data, int>& countResult, std::string orderbyCount)
+{
+	std::map<Data, int> orderCount;
+	if (!orderbyCount.empty())
+	{
+		orderCount = Count(orderbyCount);
+	}
+	for (auto key = SelectResult.begin(); key < SelectResult.end(); key++)
+	{
+		for (auto x = key + 1; x < SelectResult.end(); )
+		{
+			bool samegroup = true;
+			for (auto attr : groupby) 
+			{
+				if (row_map[*key].data[attr] != row_map[*x].data[attr])
+				{
+					samegroup = false;
+					break;
+				}
+			}
+			if (samegroup)
+			{
+				countResult[*key] += countResult[*x];
+				if (!orderCount.empty())
+					orderCount[*key] += orderCount[*x];
+				x = SelectResult.erase(x);
+			}
+			else
+				x++;
+		}
+	}
+
+	if (!orderbyCount.empty())
+	{
+		for (auto i = SelectResult.begin(); i < SelectResult.end(); i++)
+		{
+			std::vector<Data>::iterator cur = i;
+			for (auto j = i + 1; j < SelectResult.end(); j++)
+			{
+				if (orderCount[*j]<orderCount[*cur])
+				{
+					Data tmp = *cur;
+					*cur = *j;
+					*j = tmp;
+					cur = j;
+				}
+			}
+		}
+	}
+}
+
+
+
+void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
+{
+	for (auto i = SelectResult.begin(); i < SelectResult.end(); i++)
+	{
+		std::vector<Data>::iterator cur = i;
+		for (auto j = i + 1; j < SelectResult.end(); j++)
+		{
+			if (row_map[*j].data[orderbyAttr] < row_map[*cur].data[orderbyAttr])
+			{
+				Data tmp = *cur;
+				*cur = *j;
+				*j = tmp;
+				cur = j;
+			}
+		}
+	}
+}
+
+
+void Table::SelectData(const std::vector<std::string>& attrName, 
+	int countpos, 
+	const std::string& countAttr, 
+	const std::vector<std::string>& groupby, 
+	const std::string& orderbyAttr, 
+	const std::string& orderbyCount, 
+	const std::string& Where, 
+	const std::string& filename)
+{
+	std::map<Data, int> countResult;
+	if (!countAttr.empty())
+		countResult = Count(countAttr);
+
+	std::set<Data> tmp;
+	if (!Where.empty())
+		tmp = where_clause(name, Where);
+	else
+		tmp = getallkeys();
+
+	std::vector<Data> SelectResult;
+	for (auto x : tmp)
+		SelectResult.push_back(x);
+	
+	if (!groupby.empty()) // groupby非空
+		Group(SelectResult, groupby, countResult, orderbyCount);
+
+	if (!orderbyAttr.empty())
+		OrderAttr(SelectResult, orderbyAttr);
+	
+	std::streambuf* coutBuf = std::cout.rdbuf();
+	std::ofstream of;
+	if (!filename.empty())//把输出定向到文件
+	{	
+		of = std::ofstream(filename);
+		std::streambuf* fileBuf = of.rdbuf();
+		std::cout.rdbuf(fileBuf);
+	}
+
+	if (!attrName.empty())
+	{
+		int curpos = 0, countPrinted = 0;
+		if (countAttr.empty())
+			countPrinted = 1;
+		for (auto i = attrName.begin(); i < attrName.end(); i++) {
+			if (!countAttr.empty() && !countPrinted && curpos == countpos)
+			{
+				std::cout << "COUNT(" << countAttr << ")" << "\t";
+				countPrinted = 1;
+			}
+			std::cout << (*i) << ((i == attrName.end()-1 && countPrinted) ? "\n" : "\t");
+			curpos++;
+		}
+		if (!countAttr.empty() && !countPrinted)
+			std::cout << "COUNT(" << countAttr << ")" << "\n";
+
+
+		for (auto key : SelectResult)
+		{
+			int curpos = 0, countPrinted = 0;
+			if (countAttr.empty())
+				countPrinted = 1;
+
+			for (auto attr = attrName.begin(); attr < attrName.end(); attr++)
+			{
+				if (!countAttr.empty() && !countPrinted && curpos == countpos)
+				{
+					std::cout << countResult[key] << "\t";
+					countPrinted = 1;
+				}
+				std::cout << row_map[key].data[*attr] << ((attr == attrName.end()-1 && countPrinted) ? "\n" : "\t");
+				curpos++;
+			}
+
+			if (!countAttr.empty() && !countPrinted)
+				std::cout << countResult[key] << "\n";
+		}
+	}
+	else
+	{
+		std::cout << "COUNT(" << countAttr << ")\n";
+		int num = 0;
+		for (auto x : SelectResult)
+			if ( countResult[x] == 1)
+				num++;
+		std::cout << num << "\n";
+	}
+	
+
+	if (!filename.empty())
+	{
+		of.flush();
+		of.close();
+		std::cout.rdbuf(coutBuf);
+	}
 }
