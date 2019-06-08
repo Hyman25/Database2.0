@@ -1,5 +1,8 @@
 # Database2.0 更新纪要
 
+### 6.8 9:38 updated by HH
+**select** 基础功能模块完成
+
 ### 6.7 22:00 updated by zhanghexiao
 ALU模块现在可以支持比较运算符了，包括:=,<,>,>=,<=,<>,!=；
 
