@@ -7,6 +7,8 @@
 #include "Row.h"
 #include <fstream>
 #include <sstream>
+#include "ALU.h"
+
 struct Data {
 	std::string value;
 	std::string type;
