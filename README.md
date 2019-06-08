@@ -1,5 +1,8 @@
 # Database2.0 更新纪要
 
+### 6.8 10:26 updated by HH
+修复了Table中SelectData的bug
+
 ### 6.8 9:54 updated by zhanghx
 
 修复了前端select函数的bug。
