@@ -25,7 +25,7 @@ select 1+stu_id from oop_info;
 
 ```c++
 ALU obj("1+std");
-obj(table*, vector<string> keys)//oop_info的指针,假如keys={"1","2","3"}
+obj.process(table*, vector<string> keys)//oop_info的指针,假如keys={"1","2","3"}
     //将返回{”2“，”3“，”4“}
 ```
 
