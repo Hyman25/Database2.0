@@ -353,7 +353,8 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 }
 
 
-void Table::SelectData(const std::vector<std::string>& attrName, 
+void Table::SelectData(const std::vector<std::string>& attrName,
+	const std::vector<std::string>& attrNewName,
 	int countpos, 
 	const std::string& countAttr, 
 	const std::vector<std::string>& groupby, 
@@ -414,9 +415,9 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 	}
 	
 	if (filename.empty() && !SelectResult.empty())//输出表头
-		for (auto i = attrName.begin(); i < attrName.end(); i++) 
+		for (auto i = attrNewName.begin(); i < attrNewName.end(); i++) 
 		{
-			std::cout << (*i) << (i == attrName.end() - 1 ? "\n" : "\t");
+			std::cout << (*i) << (i == attrNewName.end() - 1 ? "\n" : "\t");
 		}
 
 	if ((int)attrName.size() == 1 && countpos == 0)//select后面只有count

@@ -43,6 +43,7 @@ public:
 	void Group(std::vector<Data>& SelectResult, std::vector<std::string> groupby, std::map<Data, int>& countResult, std::string orderbyCount);
 	void OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr);
 	void SelectData(const std::vector<std::string>& attrName,
+		const std::vector<std::string>& attrNewName,
 		int countpos,
 		const std::string& countAttr,
 		const std::vector<std::string>& groupby,

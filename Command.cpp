@@ -302,6 +302,7 @@ void Command::Select() {
 	}
 	string tmpColumns = str;
 
+	vector<string> AttrNewName;
 	if (tmpColumns == "*") {
 		for (int i = 0; i < (int)table.attr_list.size(); ++i) {
 			Columns.push_back(table.attr_list[i].name);
@@ -310,12 +311,27 @@ void Command::Select() {
 
 	else {
 		Columns = split(tmpColumns, ",");
+		AttrNewName = Columns;
 		for (int i = 0; i < (int)Columns.size(); ++i) {
+			//判断count(expression)
 			string tmp = Columns[i];
 			string COUNT = getFirstSubstr(tmp, "(");
 			if (toUpper(COUNT) == "COUNT") {
 				countpos = i;
 				CountAttr = getFirstSubstr(tmp, ")");
+			}
+			//判断有没有as
+
+			regex as(" ?(as) ? ", regex::icase);
+			if (regex_search(Columns[i], as)) {
+				Columns[i] = regex_replace(Columns[i], as, " $1 ");
+				as = " +";
+				Columns[i] = regex_replace(Columns[i], as, " ");
+
+				string tmp = toUpper(Columns[i]);
+				auto pos = tmp.find(" AS");
+				AttrNewName[i] = Columns[i].substr(pos + 4, Columns[i].size() - (pos + 4));
+				Columns[i] = Columns[i].substr(0, pos);
 			}
 		}
 	}
@@ -358,7 +374,7 @@ void Command::Select() {
 		orderbyCount = getFirstSubstr(tmp, ")");
 
 
-	table.SelectData(Columns, countpos, CountAttr, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
+	table.SelectData(Columns, AttrNewName, countpos, CountAttr, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
 }
 
 
