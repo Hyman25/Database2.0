@@ -1,5 +1,37 @@
 # Database2.0 更新纪要
 
+### 6.9 11:10 updated by zhanghx
+
+现在可以使用select (列名 as 别名, ...) from tablename;的语法了。别名只影响输出，不能用在groupby和orderby中。
+
+```mysql
+CREATE DATABASE OOP;
+USE OOP;
+CREATE TABLE oop_info(stu_id INT NOT NULL, stu_name CHAR, PRIMARY KEY(stu_id));
+insert into oop_info(stu_id, stu_name) values (1,"a");
+insert into oop_info(stu_id, stu_name) values (2,"b");
+insert into oop_info(stu_id, stu_name) values (3,"c");
+select stu_id as id from oop_info;
+select 1+ stu_id as 1+id from oop_info;
+select stu_name as name, Sin(stu_id) as sin(id) from oop_info;
+DROP DATABASE OOP;
+```
+
+```mysql
+id
+1
+2
+3
+1+id
+2
+3
+4
+name    sin(id)
+a       0.841471
+b       0.909297
+c       0.141120
+```
+
 ### 6.8 16:15 updated by zhanghx
 
 select函数改了一堆bug；现在急需更多测试样例。
