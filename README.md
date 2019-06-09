@@ -36,7 +36,7 @@ c       0.141120
 
 select函数改了一堆bug；现在急需更多测试样例。
 
-### 6.9 14:49 updated by HH
+### 6.8 14:49 updated by HH
 SelectData中，select支持运算式，group by支持运算式，order by支持运算式。
 
 ### 6.8 12:20 updated by zhanghx
