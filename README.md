@@ -1,5 +1,8 @@
 # Database2.0 更新纪要
 
+### 6.9 12:15 updated by HH
+修复select输出的bug
+
 ### 6.9 11:34 updated by HH
 修复order by的排序bug
 
