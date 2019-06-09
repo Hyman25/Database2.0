@@ -322,9 +322,9 @@ void Command::Select() {
 			}
 			//判断有没有as
 
-			regex as(" ?(as) ? ", regex::icase);
+			regex as("( |\\))(as)( |\\()", regex::icase);
 			if (regex_search(Columns[i], as)) {
-				Columns[i] = regex_replace(Columns[i], as, " $1 ");
+				Columns[i] = regex_replace(Columns[i], as, "$1 $2 $3");
 				as = " +";
 				Columns[i] = regex_replace(Columns[i], as, " ");
 
