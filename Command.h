@@ -5,7 +5,7 @@
 
 #include "ALU.h"
 #include "DatabaseMap.h"
-#include "Internet.h"
+
 extern DatabaseMap DB;
 
 using std::string;
