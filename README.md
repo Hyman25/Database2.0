@@ -1,5 +1,8 @@
 # Database2.0 更新纪要
 
+### 6.9 11:34 updated by HH
+修复order by的排序bug
+
 ### 6.9 11:10 updated by zhanghx
 
 现在可以使用select (列名 as 别名, ...) from tablename;的语法了。别名只影响输出，不能用在groupby和orderby中。
