@@ -1,5 +1,75 @@
 # Database2.0 更新纪要
 
+### 6.9 14:45 updated by zhanghx
+我尝试将网络连接模块封装成一个类，但是不成功。
+
+做了一些架构调整。将没有from时ALU模块的调用从command类内移到了databaseMap类中，保证command类只负责处理输入，不负责输出；DataBaseMap类中增加了判断某个表或数据库是否存在的函数。
+
+现在网络连接的指令有变化。
+
+客户端:
+
+```mysql
+link server;
+192.168.0.100 6000
+CREATE DATABASE OOP;
+USE OOP;
+CREATE TABLE oop_info(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR);
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011243, "a");
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011344, "b");
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011445, "c");
+SELECT COUNT(*) from oop_info;
+DROP DATABASE OOP;
+exit;
+```
+
+```mysql
+————————————————
+输入要连接的Ip地址与端口号：
+Connected!
+————连接服务器————
+CREATE DATABASE OOP Done!
+USE OOP Done!
+CREATE TABLE oop_info(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR) Done!
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011243, "a") Done!
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011344, "b") Done!
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011445, "c") Done!
+SELECT COUNT(*) from oop_info Done!
+COUNT(*)
+3
+DROP DATABASE OOP Done!
+————已断开连接————
+```
+服务器：
+
+```mysql
+link client;
+```
+
+```mysql
+————————————————
+本机IP[1]:192.168.0.100
+使用端口：6000
+————————————————
+服务器已启动:
+监听中...
+————连接客户端————
+CREATE DATABASE OOP
+USE OOP
+CREATE TABLE oop_info(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR)
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011243, "a")
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011344, "b")
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011445, "c")
+SELECT COUNT(*) from oop_info
+COUNT(*)
+3
+DROP DATABASE OOP
+exit
+————已断开连接————
+```
+
+
+
 ### 6.9 12:15 updated by HH
 修复select输出的bug
 
