@@ -50,6 +50,22 @@ void DatabaseMap::ShowColumns(std::string table_name)
 	current_db->ShowColumns(table_name);
 }
 
+void DatabaseMap::ALUprocess(std::vector<std::string> expressions)
+{
+	std::vector<std::vector<std::string> > results;
+	for (auto i : expressions) {
+		ALU expression(i);
+		results.push_back(expression.process());
+		std::cout << i << "\t";
+	}
+	std::cout << std::endl;
+
+	for (auto j : results) {
+		std::cout << j[0] << "\t";
+	}
+	std::cout << std::endl;
+}
+
 void DatabaseMap::InsertInto(std::string table_name, std::vector<std::string> attr_name, std::vector<std::string> value)
 {
 	current_db->INSERTinto(table_name, attr_name, value);
