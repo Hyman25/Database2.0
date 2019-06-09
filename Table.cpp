@@ -278,17 +278,16 @@ void Table::Group(std::vector<Data>& SelectResult, std::vector<std::string> grou
 
 	if (!orderbyCount.empty())
 	{
-		for (auto i = SelectResult.begin(); i < SelectResult.end(); i++)
+		for (int i = 0; i < (int)SelectResult.size(); i++)
 		{
-			std::vector<Data>::iterator cur = i;
-			for (auto j = i + 1; j < SelectResult.end(); j++)
+			for (auto cur = SelectResult.begin(); cur < SelectResult.end() - i; cur++)
 			{
+				auto j = cur + 1;
 				if (orderCount[*j]<orderCount[*cur])
 				{
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
-					cur = j;
 				}
 			}
 		}
@@ -309,11 +308,11 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 		}
 	}
 
-	for (auto i = SelectResult.begin(); i < SelectResult.end(); i++)
+	for (int i = 1; i < (int)SelectResult.size(); i++)
 	{
-		std::vector<Data>::iterator cur = i;
-		for (auto j = i + 1; j < SelectResult.end(); j++)
+		for (auto cur = SelectResult.begin(); cur < SelectResult.end() - i; cur++)
 		{
+			auto j = cur + 1;
 			if (type == "int")
 			{
 				int tmp1 = 0, tmp2 = 0;
@@ -324,7 +323,6 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
-					cur = j;
 				}
 			}
 			else if (type == "double")
@@ -337,7 +335,6 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
-					cur = j;
 				}
 			}
 			else
@@ -346,7 +343,6 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
-					cur = j;
 				}
 		}
 	}
