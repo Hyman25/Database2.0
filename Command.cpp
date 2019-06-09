@@ -412,9 +412,9 @@ void Command::Link()
 {
 	string order = toUpper(getFirstSubstr(buffer, " "));
 	if (order == "CLIENT")
-		internet->LinkAsServer();
+		LinkAsServer();
 	else if (order == "SERVER")
-		internet->LinkAsClient();
+		LinkAsClient();
 }
 
 std::set<Data> where_clause(std::string table_name, std::string clause) {
