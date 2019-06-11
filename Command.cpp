@@ -1,5 +1,4 @@
-﻿#include "Command.h"
-
+#include "Command.h"
 using std::vector;
 using std::string;
 using std::regex;
@@ -20,7 +19,7 @@ vector<string> split(const string& str, const string& sep)
 	return tmp;
 }
 
-inline void trim(std::string& s)
+void trim(std::string& s)
 {
 	if (!s.empty())
 	{
@@ -73,8 +72,12 @@ void Command::operate() {
 		Use();
 	else if (order == "LOAD")
 		Load();
+	else if (order == "INTERNET")
+		LinkAsServer();
 	else if (order == "LINK")
-		Link();
+		LinkAsClient();
+    
+    DB.Saving();
 }
 
 void Command::FormatSQL()
@@ -269,7 +272,18 @@ void Command::Select() {
 
 	if (buffer.empty()) {//没有form，必定是算术表达式
 		vector<string> expressions = split(str, ",");
-		DB.ALUprocess(expressions);
+		vector<vector<string> > results;
+		for (auto i : expressions) {
+			ALU expression(i);
+			results.push_back(expression.process());
+			std::cout << i << "\t";
+		}
+		std::cout << std::endl;
+
+		for (auto j : results) {
+			std::cout << j[0] << "\t";
+		}
+		std::cout << std::endl;
 		return;
 	}
 
@@ -361,8 +375,8 @@ void Command::Select() {
 	if (toUpper(COUNT) == "COUNT")
 		orderbyCount = getFirstSubstr(tmp, ")");
 
-	table.SelectData(Columns, AttrNewName, countpos, CountAttr, 
-		groupbyAttr, orderby, orderbyCount, whereclause, FileName);
+
+	table.SelectData(Columns, AttrNewName, countpos, CountAttr, groupbyAttr, orderby, orderbyCount, whereclause, FileName);
 }
 
 
@@ -406,15 +420,6 @@ void Command::Load()
 			Columns.push_back(i.name);
 	}
 	table.LoadFile(fileName, Columns);
-}
-
-void Command::Link()
-{
-	string order = toUpper(getFirstSubstr(buffer, " "));
-	if (order == "CLIENT")
-		LinkAsServer();
-	else if (order == "SERVER")
-		LinkAsClient();
 }
 
 std::set<Data> where_clause(std::string table_name, std::string clause) {

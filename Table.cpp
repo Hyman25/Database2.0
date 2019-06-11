@@ -278,16 +278,17 @@ void Table::Group(std::vector<Data>& SelectResult, std::vector<std::string> grou
 
 	if (!orderbyCount.empty())
 	{
-		for (int i = 1; i < (int)SelectResult.size(); i++)
+		for (auto i = SelectResult.begin(); i < SelectResult.end(); i++)
 		{
-			for (auto cur = SelectResult.begin(); cur < SelectResult.end() - i; cur++)
+			std::vector<Data>::iterator cur = i;
+			for (auto j = i + 1; j < SelectResult.end(); j++)
 			{
-				auto j = cur + 1;
-				if (orderCount[*j] < orderCount[*cur])
+				if (orderCount[*j]<orderCount[*cur])
 				{
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
+					cur = j;
 				}
 			}
 		}
@@ -308,11 +309,11 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 		}
 	}
 
-	for (int i = 1; i < (int)SelectResult.size(); i++)
+	for (auto i = SelectResult.begin(); i < SelectResult.end(); i++)
 	{
-		for (auto cur = SelectResult.begin(); cur < SelectResult.end() - i; cur++)
+		std::vector<Data>::iterator cur = i;
+		for (auto j = i + 1; j < SelectResult.end(); j++)
 		{
-			auto j = cur + 1;
 			if (type == "int")
 			{
 				int tmp1 = 0, tmp2 = 0;
@@ -323,6 +324,7 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
+					cur = j;
 				}
 			}
 			else if (type == "double")
@@ -335,6 +337,7 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
+					cur = j;
 				}
 			}
 			else
@@ -343,6 +346,7 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 					Data tmp = *cur;
 					*cur = *j;
 					*j = tmp;
+					cur = j;
 				}
 		}
 	}
@@ -436,11 +440,10 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 			{
 				if (!countAttr.empty() && !countPrinted && curpos == countpos)
 				{
+					std::cout << countResult[key] << "\t";
 					countPrinted = 1;
-					std::cout << countResult[key] << ((attr == attrName.end() - 1 && countPrinted) ? "\n" : "\t");
 				}
-				else
-					std::cout << row_map[key].data[*attr] << ((attr == attrName.end() - 1 && countPrinted) ? "\n" : "\t");
+				std::cout << row_map[key].data[*attr] << ((attr == attrName.end() - 1 && countPrinted) ? "\n" : "\t");
 				curpos++;
 			}
 
