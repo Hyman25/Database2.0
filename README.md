@@ -1,4 +1,7 @@
 # Database2.0 更新纪要
+### 6.11 18:30 updated by zhanghx
+现在可以通过oj了，但是也暴露出一些bug(已修复).
+
 ### 6.11 16:50 updated by zhanghx
 
 增加了编译选项，只有在windows下才编译网络连接模块。
