@@ -34,7 +34,7 @@ private:
 	void Save();
 };
 
-#ifdef WIN32
+#ifdef INTERNET
 void LinkAsClient();
 void LinkAsServer();
 #endif
