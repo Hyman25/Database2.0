@@ -4,9 +4,10 @@
 #include <vector>
 #include <map>
 #include <set>
-#include "Row.h"
 #include <fstream>
 #include <sstream>
+
+#include "Row.h"
 #include "ALU.h"
 
 struct Data {

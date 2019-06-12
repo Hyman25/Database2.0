@@ -1,22 +1,24 @@
-#pragma once
+﻿#pragma once
 #include <map>
 #include <string>
-#include "Database.h"
 #include <utility>
+
+#include "Database.h"
+#include "ALU.h"
 
 class DatabaseMap {
 private:
 	DatabaseMap(const DatabaseMap&) = delete;
 	void operator= (const DatabaseMap&) = delete;
 
-
 	std::map<std::string, Database> dbs;
 	std::string current_name;
 	Database* current_db = nullptr;
 
 public:
-	DatabaseMap() {};
+	DatabaseMap() = default;
 	~DatabaseMap() = default;
+
 	Database& getDatabase() { return *current_db; }
 	bool existTable(std::string tablename);
 	void CreateDatabase(std::string db_name);
@@ -28,6 +30,8 @@ public:
 	void DropTable(std::string table_name);
 	void ShowTables();
 	void ShowColumns(std::string table_name);
+
+	void ALUprocess(std::vector<std::string> expressions);
 
 	//返回数据表table_name里所有行的主键对应数据的集合
 	std::set<Data> GetAllKeys(const std::string table_name);
@@ -46,8 +50,5 @@ public:
 	//找到指定表中主键key对应Row，调用Row的output
 	void OutputRow(const std::string table_name, const std::string key); 
 	std::string getkeytype(const std::string table_name);
-    
-    void Saving();
-    void Loading();
 
 };
