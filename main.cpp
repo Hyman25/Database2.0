@@ -8,6 +8,7 @@ DatabaseMap DB;
 
 int main()
 {
+	DB.Loading();
 	std::string command;
 	while (std::getline(std::cin, command, ';')){
 		Command a(command);

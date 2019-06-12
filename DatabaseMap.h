@@ -32,6 +32,8 @@ public:
 	void ShowColumns(std::string table_name);
 
 	void ALUprocess(std::vector<std::string> expressions);
+	void Saving();
+	void Loading();
 
 	//返回数据表table_name里所有行的主键对应数据的集合
 	std::set<Data> GetAllKeys(const std::string table_name);
