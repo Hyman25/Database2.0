@@ -11,7 +11,6 @@ extern DatabaseMap DB;
 using std::string;
 
 class ALU;
-class Internet;
 
 class Command {
 public:
