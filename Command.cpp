@@ -75,6 +75,8 @@ void Command::operate() {
 		Load();
 	else if (order == "LINK")
 		Link();
+	else if (order == "SAVE")
+		Save();
 }
 
 void Command::FormatSQL()
@@ -410,11 +412,18 @@ void Command::Load()
 
 void Command::Link()
 {
+#ifdef WIN32
 	string order = toUpper(getFirstSubstr(buffer, " "));
 	if (order == "CLIENT")
 		LinkAsServer();
 	else if (order == "SERVER")
 		LinkAsClient();
+#endif // WIN32
+}
+
+void Command::Save()
+{
+	DB.Saving();
 }
 
 std::set<Data> where_clause(std::string table_name, std::string clause) {

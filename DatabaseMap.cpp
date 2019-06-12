@@ -174,7 +174,7 @@ void DatabaseMap::Saving() {
 }
 
 void DatabaseMap::Loading() {
-	std::cout << "————Loading————" << std::endl;
+	//std::cout << "————Loading————" << std::endl;
 	std::ifstream fin0;
 	fin0.open("DatabaseNames");
 
@@ -248,5 +248,5 @@ void DatabaseMap::Loading() {
 	}
 
 	fin0.close();
-	std::cout << "————Complete————" << std::endl;
+	//std::cout << "————Complete————" << std::endl;
 }
