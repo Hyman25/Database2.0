@@ -359,6 +359,27 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 	const std::string& Where, 
 	const std::string& filename)
 {
+	int tmpAttrNum = 0;
+	std::set<Data> tmpAttrKey = getallkeys();
+	for (auto x : attrName)//判断列名中是否含有运算式，若有，作为临时列加入表中，最后删除
+	{
+		ALU tmp(x);
+		if (tmp.IsALU(x))
+		{
+			tmpAttrNum++;
+			std::vector<std::string> value = tmp.process(this, tmpAttrKey);
+			Attribute tmpAttr;
+			tmpAttr.name = x;
+			tmpAttr.type = "double";
+			attr_list.push_back(tmpAttr);
+			int valueNum = 0;
+			for (auto key : tmpAttrKey)
+			{
+				row_map[key].data[x] = value[valueNum++];
+			}
+		}
+	}
+
 	std::set<Data> tmp;
 	if (!Where.empty())
 		tmp = where_clause(name, Where);
@@ -368,27 +389,6 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 	std::vector<Data> SelectResult;
 	for (auto x : tmp)
 		SelectResult.push_back(x);//结果转存到SelectResult中
-	
-	int tmpAttrNum = 0;
-	std::vector<Data> tmpAttrKey = SelectResult;
-	for (auto x : attrName)//判断列名中是否含有运算式，若有，作为临时列加入表中，最后删除
-	{
-		ALU tmp(x);
-		if (tmp.IsALU(x)) 
-		{
-			tmpAttrNum++;
-			std::vector<std::string> value = tmp.process(this, tmpAttrKey);
-			Attribute tmpAttr;
-			tmpAttr.name = x;
-			tmpAttr.type = "double";
-			attr_list.push_back(tmpAttr);
-			int valueNum = 0;
-			for (auto key:SelectResult)
-			{
-				row_map[key].data[x] = value[valueNum++];
-			}
-		}
-	}
 
 	std::map<Data, int> countResult;
 	if (!countAttr.empty())

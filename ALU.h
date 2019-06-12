@@ -21,7 +21,7 @@ public:
 	~ALU() = default;
 
 	std::vector<std::string> process();
-	std::vector<std::string> process(Table* table, const std::vector<Data>& keys);
+	std::vector<std::string> process(Table* table, const std::set<Data>& keys);
 
 	static bool IsALU(std::string str);
 	static std::regex operators;

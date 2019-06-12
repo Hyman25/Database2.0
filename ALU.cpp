@@ -41,7 +41,7 @@ std::vector<std::string> ALU::process()
 	return result;
 }
 
-vector<string> ALU::process(Table * table,const vector<Data>& keys)
+vector<string> ALU::process(Table * table,const set<Data>& keys)
 {
 	ALUformat(expression);
 	vector<string> ex_split = split(expression, " ");
