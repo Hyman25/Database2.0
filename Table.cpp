@@ -251,7 +251,7 @@ void Table::Group(std::vector<Data>& SelectResult, std::vector<std::string> grou
 	{
 		orderCount = Count(orderbyCount);
 	}
-	for (auto key = SelectResult.begin(); key < SelectResult.end(); key++)
+	for (auto key = SelectResult.begin(); key < SelectResult.end(); key++)//去除同组的其他主键
 	{
 		for (auto x = key + 1; x < SelectResult.end(); )
 		{
@@ -276,7 +276,7 @@ void Table::Group(std::vector<Data>& SelectResult, std::vector<std::string> grou
 		}
 	}
 
-	if (!orderbyCount.empty())
+	if (!orderbyCount.empty())//按照order排序
 	{
 		for (int i = 1; i < (int)SelectResult.size(); i++)
 		{
@@ -296,7 +296,7 @@ void Table::Group(std::vector<Data>& SelectResult, std::vector<std::string> grou
 
 
 
-void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
+void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)//按照列名排序
 {
 	std::string type;
 	for (auto x : attr_list)
@@ -349,15 +349,15 @@ void Table::OrderAttr(std::vector<Data>& SelectResult, std::string orderbyAttr)
 }
 
 
-void Table::SelectData(const std::vector<std::string>& attrName,
-	const std::vector<std::string>& attrNewName,
-	int countpos, 
-	const std::string& countAttr, 
-	const std::vector<std::string>& groupby, 
-	const std::string& orderbyAttr, 
-	const std::string& orderbyCount, 
-	const std::string& Where, 
-	const std::string& filename)
+void Table::SelectData(const std::vector<std::string>& attrName,//列名
+	const std::vector<std::string>& attrNewName,//select ... as 新的列名
+	int countpos, //count所在的位置
+	const std::string& countAttr, //count后面的列名
+	const std::vector<std::string>& groupby, //group后面的列名
+	const std::string& orderbyAttr, //order后面的列名
+	const std::string& orderbyCount, //order by count 后面的列名
+	const std::string& Where, //where字句
+	const std::string& filename)//输出文件名
 {
 	int tmpAttrNum = 0;
 	std::set<Data> tmpAttrKey = getallkeys();
@@ -381,14 +381,14 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 	}
 
 	std::set<Data> tmp;
-	if (!Where.empty())
+	if (!Where.empty())//处理where字句，返回主键
 		tmp = where_clause(name, Where);
 	else
 		tmp = getallkeys();
 
 	std::vector<Data> SelectResult;
 	for (auto x : tmp)
-		SelectResult.push_back(x);//结果转存到SelectResult中
+		SelectResult.push_back(x);//将结果转存到SelectResult中
 
 	std::map<Data, int> countResult;
 	if (!countAttr.empty())
@@ -416,7 +416,7 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 			std::cout << (*i) << (i == attrNewName.end() - 1 ? "\n" : "\t");
 		}
 
-	if ((int)attrName.size() == 1 && countpos == 0)//select后面只有count
+	if ((int)attrName.size() == 1 && countpos == 0)//select后面只有count的情况
 	{
 		int num = 0;
 		for (auto x : SelectResult)
@@ -424,7 +424,7 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 				num++;
 		std::cout << num << "\n";
 	}
-	else//select后面不只是count
+	else//select后面不只是count的情况
 	{
 		for (auto key : SelectResult)
 		{
@@ -434,7 +434,7 @@ void Table::SelectData(const std::vector<std::string>& attrName,
 
 			for (auto attr = attrName.begin(); attr < attrName.end(); attr++)
 			{
-				if (!countAttr.empty() && !countPrinted && curpos == countpos)
+				if (!countAttr.empty() && !countPrinted && curpos == countpos)//判断count的位置并输出
 				{
 					countPrinted = 1;
 					std::cout << countResult[key] << ((attr == attrName.end() - 1 && countPrinted) ? "\n" : "\t");
