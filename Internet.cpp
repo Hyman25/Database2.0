@@ -1,14 +1,25 @@
-#ifdef WIN32
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-#include <Winsock2.h>
-#include <iostream>
-#include <string>
-#include <fstream>
+
 #include "Command.h"
-using namespace std;
+
+#ifdef _WIN32
+#include <Winsock2.h>
+
+#elif  __APPLE__
+#include "TargetConditionals.h"
+#if TARGET_OS_MAC
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#endif // 
+
+#endif // ²Ù×÷ÏµÍ³ÅÐ¶Ï
+
 #pragma comment(lib,"ws2_32.lib")
+
+using namespace std;
 
 WSADATA wsaData;
 SOCKET sockServer;
@@ -167,4 +178,3 @@ void LinkAsClient() {
 	WSACleanup();
 }
 
-#endif // DEBUG

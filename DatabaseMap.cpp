@@ -1,4 +1,4 @@
-#include "DatabaseMap.h"
+﻿#include "DatabaseMap.h"
 
 
 bool DatabaseMap::existTable(std::string tablename)
@@ -225,8 +225,8 @@ void DatabaseMap::Loading(){
     fin_dbname>>countOfDB;
     if (countOfDB == 0) {
         fin_dbname.close();
-        std::cout<<"————Complete————"<<std::endl;
-        return;
+        std::cout<<"————Complete————"<<std::endl; 
+		return;
     }
     
     std::string DatabaseName;

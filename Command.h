@@ -34,10 +34,8 @@ private:
 	void Save();
 };
 
-#ifdef INTERNET
 void LinkAsClient();
 void LinkAsServer();
-#endif
 inline string toUpper(const string& str);
 inline void trim(std::string& s);
 inline string getFirstSubstr(string& str, const string& sep);
