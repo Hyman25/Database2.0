@@ -21,7 +21,7 @@
 
 using namespace std;
 
-WSADATA wsaData;
+
 SOCKET sockServer;
 SOCKADDR_IN addrServer;
 SOCKET sockClient;
@@ -29,8 +29,10 @@ SOCKADDR_IN addrClient;
 
 void LinkAsServer()
 {
+	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
-	sockServer = socket(AF_INET, SOCK_STREAM, 0);
+	//
+	sockServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	addrServer.sin_addr.S_un.S_addr = htonl(INADDR_ANY);//INADDR_ANY表示任何IP
 	addrServer.sin_family = AF_INET;
 	addrServer.sin_port = htons(6000);//绑定端口6000
@@ -64,7 +66,7 @@ void LinkAsServer()
 	cout << "————————————————" << endl;
 
 	//Listen监听端
-	listen(sockServer, 5);//5为等待连接数目
+	listen(sockServer, SOMAXCONN);//5为等待连接数目
 	printf("服务器已启动:\n监听中...\n");
 	int len = sizeof(SOCKADDR);
 	char sendBuf[1000] = {};//发送至客户端的字符串
@@ -83,6 +85,7 @@ void LinkAsServer()
 
 		regex reg("\n");//不知道为什么有时候exit前面会有\n
 		buf = regex_replace(buf, reg, "");
+
 		if (toUpper(buf) == "EXIT")
 			break;
 
@@ -91,11 +94,11 @@ void LinkAsServer()
 		ofstream of("out.txt");
 		// 获取文件out.txt流缓冲区指针
 		streambuf* fileBuf = of.rdbuf();
-
 		// 设置cout流缓冲区指针为out.txt的流缓冲区指针
 		cout.rdbuf(fileBuf);
 		string s(recvBuf);
 		Command com(s);
+
 		com.operate();
 		of.flush();
 		of.close();
@@ -124,6 +127,7 @@ void LinkAsServer()
 }
 
 void LinkAsClient() {
+	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	//新建客户端socket
 	sockClient = socket(AF_INET, SOCK_STREAM, 0);

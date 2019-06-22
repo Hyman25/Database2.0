@@ -24,10 +24,7 @@ set<string> ALU::function = {
 	"ABS(","SIN(","EXP(","COS(","PI(","("
 };
 
-regex ALU::operators("(\\+|-|\\*|\\/|%|(DIV)|"
-"(MOD)|(OR)|(XOR)|(AND)|(NOT)|(&&)|(\\|\\|)|!|"
-"(ABS)|(SIN)|(COS)|(EXP)|(PI)|"
-">|<|=|(>=)|(<=)|(!=)|(<>))", regex::icase);
+regex ALU::operators("((\\+|-|\\*|\\/|%|(&&)|(\\|\\|)|!|>|<|=|(>=)|(<=)|(!=)|(<>))|( +((DIV)|(MOD)|(OR)|(XOR)|(AND)|(NOT)|(ABS)|(SIN)|(COS)|(EXP)|(PI)) +))", regex::icase);
 
 std::vector<std::string> ALU::process()
 {
@@ -41,7 +38,7 @@ std::vector<std::string> ALU::process()
 	return result;
 }
 
-vector<string> ALU::process(Table * table,const set<Data>& keys)
+vector<string> ALU::process(Table * table,const vector<Data>& keys)
 {
 	ALUformat(expression);
 	vector<string> ex_split = split(expression, " ");
@@ -286,12 +283,10 @@ bool IsDouble(const string& result) {
 	return true;
 }
 
-std::string DoubleToString(const double value)
+std::string ALU::DoubleToString(const double value)
 {
 	string res = std::to_string(value);
 	auto pos = res.find('.');
-	if (pos == std::string::npos)
-		return res;
 
 	string tmp = res.substr(pos + 1, res.size() - pos - 1);
 	bool mark = false;
@@ -304,7 +299,10 @@ std::string DoubleToString(const double value)
 	if (!mark) {
 		res = res.substr(0, pos);
 		if (res == "-0") res = "0";
+		return res;
 	}
 	
+	pos = res.find_last_not_of('0');
+	res = res.substr(0, pos+1);
 	return res;
 }
