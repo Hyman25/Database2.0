@@ -1,4 +1,4 @@
-﻿#include "DatabaseMap.h"
+#include "DatabaseMap.h"
 
 
 bool DatabaseMap::existTable(std::string tablename)
@@ -18,7 +18,25 @@ void DatabaseMap::UseDatabase(std::string db_name) {
 }
 
 void DatabaseMap::DropDatabase(std::string db_name) {
-	dbs.erase(db_name);                        //删除数据库
+    dbs.erase(db_name);//删除数据库
+    
+    int countOfTab = 0;
+    std::fstream fin;
+
+    fin.open(db_name);
+    fin>>countOfTab;
+    
+    std::string tabName;
+    for (int i=0; i<countOfTab; i++) {
+        tabName = "";
+        fin>>tabName;
+    
+        const char* tab = tabName.c_str();
+        remove(tab);
+    }
+    
+    const char* DatabaseName = db_name.c_str();
+    remove(DatabaseName);
 }
 
 void DatabaseMap::ShowDatabases() {
@@ -37,7 +55,10 @@ void DatabaseMap::CreateTable(std::string table_name, std::vector<Attribute> att
 
 void DatabaseMap::DropTable(std::string table_name)
 {
-	current_db->DropTable(table_name);
+    current_db->DropTable(table_name);
+    
+    const char *tabName = table_name.c_str();
+    remove(tabName);
 }
 
 void DatabaseMap::ShowTables()
@@ -124,129 +145,179 @@ std::string DatabaseMap::getkeytype(const std::string table_name) {
 }
 
 
-//初步实现数据的加载和读取，未实现：对于数据库的增删操作，应先删除数据库所包含的表格；不同数据库创建表格的时候可能存在与其他数据库的表格重名，导致存档时生成的文件重名，考虑给表名加前缀这个解决方案
-
-void DatabaseMap::Saving() {
-	std::ofstream fout0;
-	fout0.open("DatabaseNames");//依次存入一个整数和若干字符串，用空格隔开，整数表示数据库
-	fout0 << dbs.size() << ' ';     //数量，字符串均为数据库名称
-
-	for (auto db : dbs)
-	{
-		fout0 << db.first << ' ';
-
-		std::ofstream fout1;
-		fout1.open(db.first);//以数据库名称为文件名，便于读取，此文件存表的数量和各个表名
-		fout1 << db.second.table_list.size() << ' ';
-
-		for (auto tab : db.second.table_list)
-		{
-			fout1 << tab.first << ' ';
-
-			std::ofstream fout2;
-			fout2.open(tab.first);//以表的名称作为文件名，存属性及表格数据
-
-			fout2 << tab.second.attr_list.size() << ' '
-				<< tab.second.row_map.size() << std::endl;
-
-			for (auto attr : tab.second.attr_list)
-			{
-				fout2 << attr.name << ' ' << attr.type << ' ';
-				if (attr.Null) fout2 << "1 ";
-				else fout2 << "0 ";
-				if (attr.Key) fout2 << "1\n";
-				else fout2 << "0\n";
-			}
-
-			for (auto row : tab.second.row_map)
-				for (auto val : row.second.data)
-				{
-					fout2 << val.second << ' ';
-				}
-
-			fout2.close();
-		}
-
-		fout1.close();
-	}
-
-	fout0.close();
+void DatabaseMap::Saving(){
+    //文件 DatabaseName 存储一个整数，表示数据库的数目；存储若干个字符串，表示数据库名称；整数和各个字符串之间用空格分开
+    std::fstream fout_dbname;
+    fout_dbname.open("DatabaseNames", std::fstream::out);
+    //freopen("/Users/chenyuanyong/Desktop/Database2.0-master/DatabaseNames.out", "w", stdout);
+    
+    //如果数据库数目为0，记录这个数据后就可以直接退出存档了
+    fout_dbname<<dbs.size()<<' ';
+    if (dbs.size() == 0) {
+        fout_dbname.close();
+        return;
+    }
+    
+    //每次向 DatabaseName 写入一个数据库的名称，都同时以该名称创建一个文件，该文件存储一个整数，表示该数据库包含表格的数目；存储若干个字符串，表示表格名称;整数和各个字符串之间用空格分开
+    for (auto db : dbs)
+    {
+        fout_dbname<<db.first<<' ';
+        std::fstream fout_db;
+        fout_db.open(db.first, std::fstream::out);
+        
+        //如果表格数目为0，记录这个数据，则该数据库存档完毕，立刻进行下一个数据库的存档
+        fout_db<<db.second.table_list.size()<<' ';
+        if (db.second.table_list.size() == 0) {
+            fout_db.close();
+            continue;
+        }
+        //每次向该存储数据库的文件中写入一个表格的名称，都同时以该名称创建一个文件，该文件存储两个整数，依次表示属性个数(列数，countOfCol)，数据条数(行数，countOfRow)，两个整数用空格分开；接下来存存储若干行字符串，每一行依次为 属性名称 数据类型 是否非空 是否主键，字符串之间用空格分开；最后按行记录表格内容
+        for (auto tab : db.second.table_list)
+        {
+            fout_db<<tab.first<<' ';
+            std::fstream fout_tab;
+            fout_tab.open(tab.first, std::fstream::out);
+            
+            fout_tab<<tab.second.attr_list.size()
+            <<' '<<tab.second.row_map.size()<<std::endl;
+            
+            for (auto attr : tab.second.attr_list)
+            {
+                fout_tab<<attr.name<<' '<<attr.type<<' ';
+                
+                if (attr.Null) fout_tab<<"y ";
+                else fout_tab<<"n ";
+                
+                if (attr.Key) fout_tab<<"y\n";
+                else fout_tab<<"n\n";
+            }
+            
+            //如果数据条数为0，则该表格到此存档完毕，立即开始下一张表格的存档
+            if (tab.second.row_map.size() == 0) {
+                fout_tab.close();
+                continue;
+            }
+            
+            //每一行的数据按照属性名字在map中的排序存储
+            for (auto row : tab.second.row_map)
+                for (auto value : row.second.data)
+                {
+                    fout_tab<<value.second<<' ';
+                }
+            
+            fout_tab.close();
+        }
+        
+        fout_db.close();
+    }
+    
+    fout_dbname.close();
 }
 
-void DatabaseMap::Loading() {
-	//std::cout << "————Loading————" << std::endl;
-	std::ifstream fin0;
-	fin0.open("DatabaseNames");
-
-	int numOfdbs;
-	fin0 >> numOfdbs;//读取数据库的数量
-	for (int i = 0; i < numOfdbs; i++) {
-		std::string databaseName = "";
-		fin0 >> databaseName;
-		CreateDatabase(databaseName);//创建数据库
-		current_db = &dbs[databaseName];//制定该数据库为当前使用的数据库
-
-		std::ifstream fin1;
-		fin1.open(databaseName);
-
-		int numOftabs;
-		fin1 >> numOftabs;//读取表的数量
-		for (int i = 0; i < numOftabs; i++) {
-			std::string tableName = "";
-			fin1 >> tableName;
-
-			std::ifstream fin2;
-			fin2.open(tableName);
-			int numOfcols, numOfrows;
-			fin2 >> numOfcols >> numOfrows;
-
-			std::vector<Attribute> attrs;
-			std::string KEY = "";
-			for (int i = 0; i < numOfcols; i++) {
-				Attribute attr;
-				std::string attrName = "", attrType = "";
-				fin2 >> attrName >> attrType;
-
-				int null, key;
-				fin2 >> null >> key;
-
-				if (key) KEY = attrName;
-
-				attr.name = attrName;
-				attr.type = attrType;
-				attr.Null = null;
-				attr.Key = key;
-
-				attrs.push_back(attr);
-			}
-
-			CreateTable(tableName, attrs, KEY);
-
-			//由于Table类使用Map来存储每一行数据，导致各列的数据经过列名的排序，可能与vector的顺序不同，故这里先用Set来排序，使列名的顺序和存档时的各个属性数据的顺序一致
-			std::set<std::string> attrNames;
-			for (auto x : attrs)
-				attrNames.insert(x.name);
-
-			std::vector<std::string> colNames;
-			for (auto x : attrNames)
-				colNames.push_back(x);
-
-			for (int i = 0; i < numOfrows; i++) {
-				std::vector<std::string> values;
-				for (int j = 0; j < numOfcols; j++) {
-					std::string val = "";
-					fin2 >> val;
-					values.push_back(val);
-				}
-				InsertInto(tableName, colNames, values);
-			}
-
-			fin2.close();
-		}
-
-		fin1.close();
-	}
-
-	fin0.close();
-	//std::cout << "————Complete————" << std::endl;
+void DatabaseMap::Loading(){
+    std::cout<<"————Loading————"<<std::endl;
+    
+    std::fstream fin_dbname;
+    fin_dbname.open("DatabaseNames", std::fstream::in);
+    
+    //如果数据库数目为零，则加载到此完毕
+    int countOfDB = 0;
+    fin_dbname>>countOfDB;
+    if (countOfDB == 0) {
+        fin_dbname.close();
+        std::cout<<"————Complete————"<<std::endl;
+        return;
+    }
+    
+    std::string DatabaseName;
+    for (int i=0; i < countOfDB; i++) {
+        DatabaseName = "";
+        fin_dbname >> DatabaseName;
+        CreateDatabase(DatabaseName);
+        UseDatabase(DatabaseName);
+        
+        std::fstream fin_db;
+        fin_db.open(DatabaseName, std::fstream::in);
+        
+        //如果表格数目为0，则该数据库的加载完毕，立即进行下一个数据库的加载
+        int countOfTab = 0;
+        fin_db>>countOfTab;
+        if (countOfTab == 0) {
+            fin_db.close();
+            continue;
+        }
+        
+        std::string tabName;
+        for (int i=0; i<countOfTab; i++) {
+            tabName = "";
+            fin_db >> tabName;
+            
+            std::fstream fin_tab;
+            fin_tab.open(tabName, std::fstream::in);
+            
+            std::vector<Attribute> attrs;
+            
+            int countOfcol = 0, countOfRow = 0;
+            fin_tab >> countOfcol >> countOfRow;
+            
+            std::string attrName, type, isnull, iskey, Key = "";
+            for (int i=0; i<countOfcol; i++) {
+                attrName = type = isnull = iskey = "";
+                fin_tab >> attrName >> type
+                >> isnull >> iskey;
+                
+                bool null = false, key = false;
+                if (isnull == "y") null = true;
+                if (iskey == "y") {
+                    key = true;
+                    Key = attrName;
+                }
+                
+                Attribute tmp;
+                tmp.name = attrName;
+                tmp.type = type;
+                tmp.Null = null;
+                tmp.Key = key;
+                
+                attrs.push_back(tmp);
+            }
+            
+            CreateTable(tabName, attrs, Key);
+            
+            //如果数据条数为0，则该表格到此加载完毕，立刻进行下一张表格的加载
+            if (countOfRow == 0) {
+                fin_tab.close();
+                continue;
+            }
+            //数据要按照属性的名称在map中的排序插入，利用set的自动排序功能给上面的vector attrs排序
+            std::set<std::string> attrs_set;
+            std::vector<std::string> attrs_vec;
+            for (auto x : attrs)
+                attrs_set.insert(x.name);
+            
+            for (auto x : attrs_set)
+                attrs_vec.push_back(x);
+            
+            
+            for (int i=0; i<countOfRow; i++) {
+                std::vector<std::string> values;
+                std::string val;
+                for (int j=0; j<countOfcol; j++) {
+                    val = "";
+                    fin_tab>>val;
+                    values.push_back(val);
+                }
+                InsertInto(tabName, attrs_vec, values);
+                values.clear();
+            }
+            
+            fin_tab.close();
+        }
+        
+        fin_db.close();
+    }
+    
+    fin_dbname.close();
+    
+    std::cout<<"————Complete————"<<std::endl;
 }
