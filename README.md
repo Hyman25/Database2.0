@@ -1,5 +1,19 @@
 # Database2.0 测试样例
 
+我们需要为附加功能编写测试样例，样例需要展示出功能的正确性和鲁棒性。
+
+| 功能                              | 分数    |
+| --------------------------------- | ------- |
+| 网络连接(win&mac)                 | 15%     |
+| 算术&逻辑&比较运算                | 5%+5%+? |
+| 存档                              | 5%+5%   |
+| 数字函数(sin,cos,exp,abs,pi,etc.) | 10%     |
+| select..as..                      | ?       |
+
+每组一到两个样例，我们需要大概10个样例。
+
+---
+
 ```mysql
 CREATE DATABASE SCHOOL;
 USE SCHOOL;
@@ -23,6 +37,7 @@ INSERT INTO score(score_id, course_num, student_num, score) VALUES (16, 4, 16004
 SELECT student_num AS name, COUNT(score_id) INTO OUTFILE 'out' FROM score GROUP BY student_num ORDER BY COUNT(score_id);
 DROP DATABASE SCHOOL;
 ```
+---
 
 网络连接
 
@@ -86,8 +101,9 @@ DROP DATABASE OOP
 exit
 ————已断开连接————
 ```
+---
 
-select (列名 as 别名, ...) from tablename;的语法了。别名只影响输出，不能用在groupby和orderby中。
+select (列名 as 别名, ...) from tablename;别名只影响输出，不能用在groupby和orderby中。
 
 ```mysql
 CREATE DATABASE OOP;
@@ -118,14 +134,7 @@ c       0.141120
 ```
 
 
-```mysql
-select 1+2,2+3;
-1+2     2+3
-3       5
-```
-
-
-使用“select (逻辑&算术表达式） from tablename;”的语法了，一个测试样例。
+select (逻辑&算术&比较表达式) from tablename; 在这些运算中，char类型的数据均视为0.
 
 ```mysql
 CREATE DATABASE OOP;
@@ -156,13 +165,17 @@ SIN( stu_id * PI( ) )
 -2.44929e-16
 3.67394e-16
 ```
+---
 
-如果select语句中不含from关键词，将利用ALU类进行科学计算。例：
+如果select语句中不含from关键词，将利用ALU类进行科学计算
 
 ```mysql
 select 1 + 2 and PI();
 1 + 2 and PI( )
 1
+select 1+2,2+3;
+1+2     2+3
+3       5
 ```
 
 
