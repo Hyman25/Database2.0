@@ -1,4 +1,4 @@
-﻿#include "Command.h"
+#include "Command.h"
 using namespace std;
 
 vector<string> split(const string& str, const string& sep)
@@ -74,6 +74,8 @@ void Command::operate() {
 		Link();
 	else if (order == "SAVE")
 		Save();
+    
+    DB.Saving();
 }
 
 void Command::FormatSQL()
