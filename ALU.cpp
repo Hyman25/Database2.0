@@ -24,7 +24,7 @@ set<string> ALU::function = {
 	"ABS(","SIN(","EXP(","COS(","PI(","LN(","("
 };
 
-regex ALU::operators("((\\+|-|\\*|\\/|%|(&&)|(\\|\\|)|!|>|<|=|(>=)|(<=)|(!=)|(<>))|(([^A-Z]| ?)((LN)|(DIV)|(MOD)|(OR)|(XOR)|(AND)|(NOT)|(ABS)|(SIN)|(COS)|(EXP)|(PI)) *\\())", regex::icase);
+regex ALU::operators("((\\+|-|\\*|\\/|%|(&&)|(\\|\\|)|!|>|<|=|(>=)|(<=)|(!=)|(<>))|(([^A-Z]| ?)((LN)|(DIV)|(MOD)|(OR)|(XOR)|(AND)|(NOT)|(ABS)|(SIN)|(COS)|(EXP)|(PI))( +|\\()))", regex::icase);
 
 std::vector<std::string> ALU::process()
 {
