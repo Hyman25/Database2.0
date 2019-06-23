@@ -11,7 +11,7 @@ using std::stack;
 
 map<string, int> ALU::priority = {
 	//À¨ºÅºÍÊý×Öº¯Êý
-	{"(",-1},{")",-1},{"ABS(",-1},{"SIN(",-1},{"COS(",-1},{"EXP(",-1} ,{"PI(",-1},
+	{"(",-1},{")",-1},{"ABS(",-1},{"SIN(",-1},{"COS(",-1},{"EXP(",-1} ,{"LN(",-1},{"PI(",-1},
 	//Âß¼­ÔËËã·û
 	{"||",1},{"OR",1},{"XOR",1},{"&&",2},{"AND",2},{"NOT",3},{"!",3},
 	//±È½ÏÔËËã·û
@@ -21,10 +21,10 @@ map<string, int> ALU::priority = {
 };
 
 set<string> ALU::function = {
-	"ABS(","SIN(","EXP(","COS(","PI(","("
+	"ABS(","SIN(","EXP(","COS(","PI(","LN(","("
 };
 
-regex ALU::operators("((\\+|-|\\*|\\/|%|(&&)|(\\|\\|)|!|>|<|=|(>=)|(<=)|(!=)|(<>))|(([^A-Z]| ?)((DIV)|(MOD)|(OR)|(XOR)|(AND)|(NOT)|(ABS)|(SIN)|(COS)|(EXP)|(PI)) *\\())", regex::icase);
+regex ALU::operators("((\\+|-|\\*|\\/|%|(&&)|(\\|\\|)|!|>|<|=|(>=)|(<=)|(!=)|(<>))|(([^A-Z]| ?)((LN)|(DIV)|(MOD)|(OR)|(XOR)|(AND)|(NOT)|(ABS)|(SIN)|(COS)|(EXP)|(PI)) *\\())", regex::icase);
 
 std::vector<std::string> ALU::process()
 {
@@ -193,7 +193,12 @@ string ALU::Calculate(vector<string>& expression)
 			nums.push(exp(num1));
 			continue;
 		}
-
+		else if (expression[i] == "LN(") {
+			if (num1 <= 0)
+				return "NULL";
+			nums.push(log(num1));
+			continue;
+		}
 		if (!nums.empty()) {//·ÀÖ¹³ÌÐò±ÀÀ£
 			num2 = nums.top();
 			nums.pop();
@@ -261,6 +266,8 @@ void ALU::ALUformat(string& str)
 	reg = "< *>";
 	str = regex_replace(str, reg, "<>");
 
+	regex reg4("LN *\\(", regex::icase);
+	str = regex_replace(str, reg4, "LN(");
 	regex reg5("ABS *\\(", regex::icase);
 	str = regex_replace(str, reg5, "ABS(");
 	regex reg6("SIN *\\(", regex::icase);
