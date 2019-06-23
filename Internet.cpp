@@ -129,7 +129,7 @@ void LinkAsClient() {
 	int error = connect(sockClient, (SOCKADDR*)& addrServer, sizeof(SOCKADDR));
 
 	if (error == SOCKET_ERROR) {
-		cout << "ERROR!\n";
+		cout << "LINK ERROR!¶Ï¿ªÁ¬½Ó!\n";
 		return;
 	}
 

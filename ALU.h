@@ -34,11 +34,11 @@ private:
 
 	static std::vector<std::string> Transfer(std::vector<std::string>&);
 	static std::string Calculate(std::vector<std::string>&);
-
+	static std::string DoubleToString(const double value);
 	void ALUformat(std::string& expression);
 };
 
 inline std::string toUpper(const std::string& str);
 bool IsDouble(const std::string& result);
-std::string DoubleToString(const double value);
+
 std::vector<std::string> split(const std::string& str, const std::string& sep);
