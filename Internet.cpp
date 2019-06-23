@@ -8,14 +8,15 @@ using namespace std;
 #include <Winsock2.h>
 #pragma comment(lib,"ws2_32.lib")
 
+WSADATA wsaData;
+SOCKET sockServer, sockClient;
+SOCKADDR_IN addrServer, addrClient;
+
 void LinkAsServer()
 {
-	WSADATA wsaData;
-	SOCKET sockServer, sockClient;
-	SOCKADDR_IN addrServer, addrClient;
-
+	//memset(&addrServer, 0, sizeof(addrServer));
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
-	sockServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	sockServer = socket(AF_INET, SOCK_STREAM, 0);
 	addrServer.sin_addr.S_un.S_addr = htonl(INADDR_ANY);//INADDR_ANY表示任何IP
 	addrServer.sin_family = AF_INET;
 	addrServer.sin_port = htons(6000);//绑定端口6000
@@ -49,7 +50,7 @@ void LinkAsServer()
 	cout << "————————————————" << endl;
 
 	//Listen监听端
-	listen(sockServer, SOMAXCONN);
+	listen(sockServer, 5);
 	printf("服务器已启动:\n监听中...\n");
 
 	//会阻塞进程，直到有客户端连接上来为止
@@ -62,7 +63,7 @@ void LinkAsServer()
 	while (true)
 	{
 		//接收并打印客户端数据
-		if (recv(sockClient, recvBuf, 1000, 0) != SOCKET_ERROR)
+		if (recv(sockClient, recvBuf, 1000, 0) <0)
 			break;
 
 		string buf(recvBuf);
@@ -109,9 +110,7 @@ void LinkAsServer()
 }
 
 void LinkAsClient() {
-	WSADATA wsaData;
-	SOCKADDR_IN addrServer;
-	SOCKET sockClient;
+
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	//新建客户端socket
