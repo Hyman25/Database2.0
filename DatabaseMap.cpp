@@ -34,7 +34,7 @@ void DatabaseMap::DropDatabase(std::string db_name) {
         const char* tab = tabName.c_str();
         remove(tab);
     }
-    
+    fin.close();
     const char* DatabaseName = db_name.c_str();
     remove(DatabaseName);
 }
