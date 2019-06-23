@@ -6,6 +6,7 @@
 
 #ifdef _WIN32
 #include <Winsock2.h>
+#pragma comment(lib,"ws2_32.lib")
 
 #elif  __APPLE__
 #include "TargetConditionals.h"
@@ -17,21 +18,15 @@
 
 #endif // 操作系统判断
 
-#pragma comment(lib,"ws2_32.lib")
-
 using namespace std;
-
-
-SOCKET sockServer;
-SOCKADDR_IN addrServer;
-SOCKET sockClient;
-SOCKADDR_IN addrClient;
 
 void LinkAsServer()
 {
 	WSADATA wsaData;
+	SOCKET sockServer, sockClient;
+	SOCKADDR_IN addrServer, addrClient;
+
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
-	//
 	sockServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	addrServer.sin_addr.S_un.S_addr = htonl(INADDR_ANY);//INADDR_ANY表示任何IP
 	addrServer.sin_family = AF_INET;
@@ -66,44 +61,42 @@ void LinkAsServer()
 	cout << "————————————————" << endl;
 
 	//Listen监听端
-	listen(sockServer, SOMAXCONN);//5为等待连接数目
+	listen(sockServer, SOMAXCONN);
 	printf("服务器已启动:\n监听中...\n");
-	int len = sizeof(SOCKADDR);
-	char sendBuf[1000] = {};//发送至客户端的字符串
-	char recvBuf[1000] = {};//接受客户端返回的字符串
+
 	//会阻塞进程，直到有客户端连接上来为止
+	int len = sizeof(SOCKADDR);
 	sockClient = accept(sockServer, (SOCKADDR*)& addrClient, &len);
+	char recvBuf[1000] = {};//接受客户端返回的字符串
+
 	cout << "————连接客户端————" << endl;
 
 	while (true)
 	{
 		//接收并打印客户端数据
-		if (recv(sockClient, recvBuf, 1000, 0) <= 0)
+		if (recv(sockClient, recvBuf, 1000, 0) != SOCKET_ERROR)
 			break;
-		cout << recvBuf << endl;
-		string buf(recvBuf);
 
+		string buf(recvBuf);
 		regex reg("\n");//不知道为什么有时候exit前面会有\n
 		buf = regex_replace(buf, reg, "");
 
+		cout << buf << endl;
 		if (toUpper(buf) == "EXIT")
 			break;
 
 		streambuf* coutBuf = cout.rdbuf();
-
 		ofstream of("out.txt");
-		// 获取文件out.txt流缓冲区指针
 		streambuf* fileBuf = of.rdbuf();
-		// 设置cout流缓冲区指针为out.txt的流缓冲区指针
 		cout.rdbuf(fileBuf);
+
 		string s(recvBuf);
 		Command com(s);
-
 		com.operate();
+
 		of.flush();
 		of.close();
 		cout.rdbuf(coutBuf);
-
 		ifstream fin;
 		fin.open("out.txt");
 		string tmp, contents;
@@ -123,11 +116,15 @@ void LinkAsServer()
 	cout << "————已断开连接————" << endl;
 	//关闭socket
 	closesocket(sockClient);
+	closesocket(sockServer);
 	WSACleanup();
 }
 
 void LinkAsClient() {
 	WSADATA wsaData;
+	SOCKADDR_IN addrServer;
+	SOCKET sockClient;
+
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	//新建客户端socket
 	sockClient = socket(AF_INET, SOCK_STREAM, 0);
@@ -139,24 +136,23 @@ void LinkAsClient() {
 	std::cin >> s >> port; getchar();
 	addrServer.sin_addr.S_un.S_addr = inet_addr(s.c_str());//目标IP(127.0.0.1是回送地址)
 	addrServer.sin_family = AF_INET;
-	addrServer.sin_port = htons(port);//连接端口6000
+	addrServer.sin_port = htons(port);//连接端口
 	//连接到服务端
 	int error = connect(sockClient, (SOCKADDR*)& addrServer, sizeof(SOCKADDR));
 
-	if (!error) cout << "Connected!\n";
-	else if (error == SOCKET_ERROR) {
+	if (error == SOCKET_ERROR) {
 		cout << "ERROR!\n";
 		return;
 	}
 
-	//发送数据
+	cout << "Connected!\n";
+
 	cout << "————连接服务器————" << endl;
+	//发送数据
 	string message;
 	while (true)
 	{
 		getline(cin, message, ';');
-
-		char* tmp = const_cast<char*>(message.c_str());
 		send(sockClient, message.c_str(), message.size() + 1, 0);
 
 		regex reg("\n");//不知道为什么有时候exit前面会有\n
@@ -177,8 +173,7 @@ void LinkAsClient() {
 
 	}
 	//关闭socket
-	closesocket(sockClient);
 	cout << "————已断开连接————" << endl;
+	closesocket(sockClient);
 	WSACleanup();
 }
-

@@ -215,7 +215,7 @@ void DatabaseMap::Saving(){
 }
 
 void DatabaseMap::Loading(){
-    std::cout<<"————Loading————"<<std::endl;
+ //   std::cout<<"————Loading————"<<std::endl;
     
     std::fstream fin_dbname;
     fin_dbname.open("DatabaseNames", std::fstream::in);
@@ -225,7 +225,7 @@ void DatabaseMap::Loading(){
     fin_dbname>>countOfDB;
     if (countOfDB == 0) {
         fin_dbname.close();
-        std::cout<<"————Complete————"<<std::endl; 
+       // std::cout<<"————Complete————"<<std::endl; 
 		return;
     }
     
@@ -319,5 +319,5 @@ void DatabaseMap::Loading(){
     
     fin_dbname.close();
     
-    std::cout<<"————Complete————"<<std::endl;
+    //std::cout<<"————Complete————"<<std::endl;
 }
